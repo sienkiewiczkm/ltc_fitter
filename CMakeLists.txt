@@ -11,12 +11,14 @@ include_directories(${PROJECT_SOURCE_DIR}/dependencies/stb)
 
 add_executable(
     ${PROJECT_NAME}
-    src/main.cpp
+    src/brdf_plot.cpp
     src/fitting_settings.cpp
     src/ltc_fitting.cpp
     src/result_saving.cpp
     src/nelder_mead.cpp
     src/ltc_nelder_mead.cpp
+    src/main.cpp
+    src/raycasting.cpp
     src/stb_implementation.c
 )
 
