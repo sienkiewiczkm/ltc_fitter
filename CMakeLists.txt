@@ -13,12 +13,13 @@ add_executable(
     ${PROJECT_NAME}
     src/brdf_plot.cpp
     src/fitting_settings.cpp
+    src/ggx.cpp
     src/ltc_fitting.cpp
-    src/result_saving.cpp
-    src/nelder_mead.cpp
     src/ltc_nelder_mead.cpp
     src/main.cpp
+    src/nelder_mead.cpp
     src/raycasting.cpp
+    src/result_saving.cpp
     src/stb_implementation.c
 )
 

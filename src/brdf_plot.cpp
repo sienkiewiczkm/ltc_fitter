@@ -5,7 +5,7 @@
 #include <vector>
 
 brdf_plot::brdf_plot():
-    _size{256}
+    _size{512}
 {
 }
 
@@ -15,12 +15,20 @@ void brdf_plot::set_resolution(int size)
 }
 
 void brdf_plot::export_png(
+    const brdf* brdf,
     const std::string& filepath
 )
 {
-    std::vector<unsigned char> image_data;
-    image_data.resize(3 * _size * _size);
+    _brdf = brdf;
+    _max_hotness = 0.0f;
 
+    setup_camera();
+    auto image_data = get_image_data();
+    save_png(image_data, {_size, _size}, filepath);
+}
+
+void brdf_plot::setup_camera()
+{
     _sphere_origin = {0.0, 0.0f, 0.0f};
     _sphere_radius = 1.0f;
 
@@ -34,6 +42,12 @@ void brdf_plot::export_png(
     );
 
     _view_matrix_inv = glm::inverse(view_matrix);
+}
+
+std::vector<unsigned char> brdf_plot::get_image_data()
+{
+    std::vector<unsigned char> image_data;
+    image_data.resize(3 * _size * _size);
 
     for (auto y = 0; y < _size; ++y)
     {
@@ -53,11 +67,20 @@ void brdf_plot::export_png(
         }
     }
 
-    int stride = 3 * sizeof(unsigned char) * _size;
+    return image_data;
+}
+
+void brdf_plot::save_png(
+    const std::vector<unsigned char>& image_data,
+    const glm::ivec2& resolution,
+    const std::string filename
+)
+{
+    int stride = 3 * sizeof(unsigned char) * resolution.x;
     stbi_write_png(
-        filepath.c_str(),
-        _size,
-        _size,
+        filename.c_str(),
+        resolution.x,
+        resolution.y,
         3,
         image_data.data(),
         stride
@@ -85,9 +108,16 @@ glm::vec3 brdf_plot::get_pixel_color(glm::vec2 screen_coord)
 
     if (intersection_sphere.y < 0.0f) { return {1.0f, 1.0f, 1.0f}; }
 
+    glm::vec3 view_dir{-1.0f, 1.0f, 1.0f};
+    view_dir = glm::normalize(view_dir);
+
     auto sphere_direction = glm::normalize(intersection_sphere);
-    auto float_color = glm::vec3{sphere_direction.y, 0.0f, 0.0f};
-    float_color = float_color * float_color;
+
+    float pdf;
+    auto value = _brdf->evaluate(sphere_direction, view_dir, pdf);
+    _max_hotness = std::max(_max_hotness, value);
+
+    auto float_color = glm::vec3{get_hotness_color(value, 0.0f, 5.0f)};
 
     return float_color;
 }
@@ -147,4 +177,34 @@ glm::ivec3 brdf_plot::get_8bit_color(glm::vec3 float_color)
     auto b = std::roundf(255.0f * clamped_color.b);
     return glm::ivec3{r, g, b};
 
+}
+
+glm::vec3 brdf_plot::get_hotness_color(float v, float vmin, float vmax) const
+{
+    // source, credit to StackOverflow:
+    //   https://stackoverflow.com/a/7811134/3495132
+    glm::vec3 c = {1.0,1.0,1.0}; // white
+    float dv;
+
+    if (v < vmin)
+        v = vmin;
+    if (v > vmax)
+        v = vmax;
+    dv = vmax - vmin;
+
+    if (v < (vmin + 0.25 * dv)) {
+        c.r = 0;
+        c.g = 4 * (v - vmin) / dv;
+    } else if (v < (vmin + 0.5 * dv)) {
+        c.r = 0;
+        c.b = 1 + 4 * (vmin + 0.25 * dv - v) / dv;
+    } else if (v < (vmin + 0.75 * dv)) {
+        c.r = 4 * (v - vmin - 0.5 * dv) / dv;
+        c.b = 0;
+    } else {
+        c.g = 1 + 4 * (vmin + 0.75 * dv - v) / dv;
+        c.b = 0;
+    }
+
+    return(c);
 }
