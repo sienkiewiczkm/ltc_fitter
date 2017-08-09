@@ -20,9 +20,10 @@ void brdf_plot::export_png(
 )
 {
     _brdf = brdf;
-    _max_hotness = 0.0f;
 
     setup_camera();
+    _max_hotness = estimate_maximum_value();
+
     auto image_data = get_image_data();
     save_png(image_data, {_size, _size}, filepath);
 }
@@ -42,6 +43,9 @@ void brdf_plot::setup_camera()
     );
 
     _view_matrix_inv = glm::inverse(view_matrix);
+
+    glm::vec3 view_dir{-1.0f, 1.0f, 1.0f};
+    _view_dir = glm::normalize(view_dir);
 }
 
 std::vector<unsigned char> brdf_plot::get_image_data()
@@ -108,16 +112,12 @@ glm::vec3 brdf_plot::get_pixel_color(glm::vec2 screen_coord)
 
     if (intersection_sphere.y < 0.0f) { return {1.0f, 1.0f, 1.0f}; }
 
-    glm::vec3 view_dir{-1.0f, 1.0f, 1.0f};
-    view_dir = glm::normalize(view_dir);
-
     auto sphere_direction = glm::normalize(intersection_sphere);
 
     float pdf;
-    auto value = _brdf->evaluate(sphere_direction, view_dir, pdf);
-    _max_hotness = std::max(_max_hotness, value);
+    auto value = _brdf->evaluate(sphere_direction, _view_dir, pdf);
 
-    auto float_color = glm::vec3{get_hotness_color(value, 0.0f, 5.0f)};
+    auto float_color = glm::vec3{get_hotness_color(value, 0.0f, _max_hotness)};
 
     return float_color;
 }
@@ -167,6 +167,29 @@ glm::vec3 brdf_plot::get_ray_direction(glm::vec2 screen_coord)
 #else
     return glm::normalize(_eye_target - _eye_position);
 #endif
+}
+
+float brdf_plot::estimate_maximum_value(int samples_sqrt)
+{
+    float max_value = std::numeric_limits<float>::lowest();
+
+    for (int i = 0; i < samples_sqrt; ++i)
+    {
+        for (int j = 0; j < samples_sqrt; ++j)
+        {
+            const glm::vec2 sample{
+                (i+0.5f)/(float)samples_sqrt,
+                (j+0.5f)/(float)samples_sqrt
+            };
+
+            float pdf;
+            auto test_vector = _brdf->sample({}, sample);
+            auto test_value = _brdf->evaluate(test_vector, _view_dir, pdf);
+            max_value = std::max(max_value, test_value);
+        }
+    }
+
+    return max_value;
 }
 
 glm::ivec3 brdf_plot::get_8bit_color(glm::vec3 float_color)

@@ -15,6 +15,7 @@ public:
 protected:
     void setup_camera();
     std::vector<unsigned char> get_image_data();
+    float estimate_maximum_value(int samples_sqrt = 128);
     void save_png(
         const std::vector<unsigned char>& image_data,
         const glm::ivec2& resolution,
@@ -39,6 +40,8 @@ private:
     float _sphere_radius;
 
     float _max_hotness;
+
+    glm::vec3 _view_dir;
 
     glm::mat4 _view_matrix_inv;
 };

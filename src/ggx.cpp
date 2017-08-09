@@ -69,7 +69,7 @@ glm::vec3 ggx::sample(
     };
 
     auto up_vector = std::fabs(_normal.z) < 0.999f
-        ? glm::vec3{0.0f, 1.0f, 0.0f}
+        ? glm::vec3{0.0f, 0.0f, 1.0f}
         : glm::vec3{1.0f, 0.0f, 0.0f};
 
     auto tangent_x = glm::normalize(glm::cross(up_vector, _normal));
