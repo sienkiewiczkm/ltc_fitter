@@ -5,8 +5,14 @@
 #include <vector>
 
 brdf_plot::brdf_plot():
-    _size{512}
+    _size{512},
+    _view_dir{glm::normalize(glm::vec3{-1.0f, 1.0f, 0.0f})}
 {
+}
+
+void brdf_plot::set_view_dir(const glm::vec3& view_dir)
+{
+    _view_dir = view_dir;
 }
 
 void brdf_plot::set_resolution(int size)
@@ -33,7 +39,7 @@ void brdf_plot::setup_camera()
     _sphere_origin = {0.0, 0.0f, 0.0f};
     _sphere_radius = 1.0f;
 
-    _eye_position = {0.0f, 1.0f, -1.4f};
+    _eye_position = 1.2f * glm::normalize(glm::vec3{1.0f, 1.0f, -1.0f});
     _eye_target = {0.0f, 0.0f, 0.0f};
 
     glm::mat4 view_matrix = glm::lookAt(
@@ -43,9 +49,6 @@ void brdf_plot::setup_camera()
     );
 
     _view_matrix_inv = glm::inverse(view_matrix);
-
-    glm::vec3 view_dir{-1.0f, 1.0f, 1.0f};
-    _view_dir = glm::normalize(view_dir);
 }
 
 std::vector<unsigned char> brdf_plot::get_image_data()

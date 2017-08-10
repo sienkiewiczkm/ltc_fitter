@@ -36,6 +36,10 @@ float ggx::evaluate(
     float n_dot_v = std::max(glm::dot(normal, view_dir), 0.0f);
     float denominator = 4.0f * n_dot_l * n_dot_v + 0.001f;
 
+    float n_dot_h = std::max(glm::dot(normal, half_vector), 0.0f);
+    float v_dot_h = std::max(glm::dot(view_dir, half_vector), 0.0f);
+    probability_density_function = (ndf * n_dot_h) / (4.0f * v_dot_h);
+
     return nominator / denominator;
 }
 

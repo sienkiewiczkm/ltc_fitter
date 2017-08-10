@@ -11,7 +11,7 @@ public:
     ggx();
     virtual ~ggx() {}
 
-    void setAlpha(float alpha) { _alpha = alpha; }
+    virtual void set_alpha(float alpha) { _alpha = alpha; }
 
     virtual float evaluate(
         const glm::vec3& light_dir,

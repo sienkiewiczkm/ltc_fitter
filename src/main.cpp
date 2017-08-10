@@ -13,29 +13,33 @@
 
 int main(int argc, const char* argv[])
 {
+    float alpha = 0.4f;
+
     ggx ggx;
+    ggx.set_alpha(alpha);
+
+    glm::vec3 view_dir{-1.0f, 2.0f, 0.0f};
+    view_dir = glm::normalize(view_dir);
+
+    brdf_plot plot;
+    plot.set_view_dir(view_dir);
+    plot.export_png(&ggx, "test.png");
+
+    std::cerr << "Fitting started." << std::endl;
+
+    auto parameters = ltc_fit_single(ggx, view_dir);
+
+    std::cerr << "Fitting complete, parameters: "
+        << glm::to_string(parameters) << std::endl;
 
     ltc ltc;
     ltc.set_ltc_matrix({
-        {0.1f, 0.0f, 0.0f},
-        {1.0f, 1.0f, 0.0f},
-        {0.0f, 0.0f, 0.5f}
+        {parameters.x, parameters.y, 0.0f},
+        {parameters.w, 1.0f, 0.0f},
+        {0.0f, 0.0f, parameters.z}
     });
 
-    brdf_plot plot;
-    plot.export_png(&ggx, "test.png");
     plot.export_png(&ltc, "test_ltc.png");
-
-    fitting_settings settings;
-    if (!get_fitting_settings_from_command_line(settings, argc, argv))
-    {
-        std::cout << "failed to set fitting settings" << std::endl;
-        return EXIT_FAILURE;
-    }
-
-    print_fitting_settings(settings);
-    auto result = ltc_fit(settings);
-    save_fitting_result(result);
 
     return EXIT_SUCCESS;
 }

@@ -9,6 +9,7 @@ public:
     brdf_plot();
     ~brdf_plot() {}
 
+    void set_view_dir(const glm::vec3& view_dir);
     void set_resolution(int size);
     void export_png(const brdf* brdf, const std::string& filepath);
 
@@ -38,10 +39,7 @@ private:
     glm::vec3 _eye_target;
     glm::vec3 _sphere_origin;
     float _sphere_radius;
-
     float _max_hotness;
-
     glm::vec3 _view_dir;
-
     glm::mat4 _view_matrix_inv;
 };

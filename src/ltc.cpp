@@ -24,9 +24,9 @@ float ltc::evaluate(
     const auto pi = boost::math::constants::pi<float>();
     float d = 1.0f / pi * std::max(0.0f, original_light_dir.y);
 
-    probability_density_function = -1.0f; // todo: find a formula for that
-
     float result = _amplitude * d * jacobian;
+
+    probability_density_function = result / _amplitude;
 
     return result;
 }

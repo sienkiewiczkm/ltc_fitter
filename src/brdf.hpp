@@ -16,4 +16,6 @@ public:
         const glm::vec3& view_dir,
         const glm::vec2& random_parameters
     ) const = 0;
+
+    virtual void set_alpha(float alpha) {}
 };

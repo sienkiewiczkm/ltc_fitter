@@ -2,6 +2,7 @@
 #include <vector>
 #include "glm/glm.hpp"
 #include "fitting_settings.hpp"
+#include "brdf.hpp"
 
 struct fitting_result
 {
@@ -9,4 +10,17 @@ struct fitting_result
     std::vector<glm::vec4> transformations;
 };
 
-fitting_result ltc_fit(fitting_settings settings);
+glm::vec4 ltc_fit(brdf& brdf);
+glm::vec4 ltc_fit_single(brdf& brdf, glm::vec3 view_dir);
+
+float compute_distribution_norm(
+    const brdf& brdf,
+    const glm::vec3& view_dir,
+    const int num_samples = 64
+);
+
+glm::vec3 compute_average_direction(
+    const brdf& brdf,
+    const glm::vec3& view_dir,
+    const int num_samples = 64
+);
