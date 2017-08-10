@@ -14,6 +14,7 @@ add_executable(
     src/brdf_plot.cpp
     src/fitting_settings.cpp
     src/ggx.cpp
+    src/ltc.cpp
     src/ltc_fitting.cpp
     src/ltc_nelder_mead.cpp
     src/main.cpp
