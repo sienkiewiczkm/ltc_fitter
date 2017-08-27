@@ -57,14 +57,58 @@ fitting_result build_lookup(const fitting_settings& settings)
             << std::setw(9) << roughness
             << std::endl;
 
-        glm::vec4 parameters{};
+
+        glm::mat3 initial_frame{1.0f};
+        glm::vec4 initial_parameters{};
+
+        // generate first guess
+        if (angle_frag == 0)
+        {
+            if (rough_frag == 0)
+            {
+                initial_parameters = {1.0, 0.0f, 1.0f, 0.0f};
+            }
+            else
+            {
+                auto index = (rough_frag - 1) * settings.resolution;
+                auto similar_parameters = result.transformations[index];
+                initial_parameters = similar_parameters;
+            }
+        }
+        else
+        {
+            auto average_direction = glm::normalize(
+                compute_average_direction(*brdf, view_dir)
+            );
+
+            auto x_axis = glm::vec3{
+                average_direction.z,
+                0.0f,
+                -average_direction.x
+            };
+
+            auto y_axis = glm::vec3{0.0f, 1.0f, 0.0f};
+            auto z_axis = average_direction;
+
+            initial_frame = {x_axis, y_axis, z_axis};
+
+            auto last_parameters = result.transformations.back();
+            initial_parameters = last_parameters;
+        }
+
+        glm::vec4 result_parameters{};
 
         try {
-            parameters = ltc_fit(*brdf, view_dir);
+            result_parameters = ltc_fit(
+                *brdf,
+                view_dir,
+                initial_parameters,
+                initial_frame
+            );
         } catch (...) {
         }
 
-        result.transformations.push_back(parameters);
+        result.transformations.push_back(result_parameters);
     }
 
     log_info() << "Fitting process completed." << std::endl;

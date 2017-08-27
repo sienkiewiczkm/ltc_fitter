@@ -5,7 +5,12 @@
 
 #include "log.hpp"
 
-glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
+glm::vec4 ltc_fit(
+    brdf& brdf,
+    glm::vec3 view_dir,
+    glm::vec4 initial_parameters,
+    glm::mat3 initial_frame
+)
 {
     const float SAFE_AMPLITUDE_THRESHOLD = 0.0001f;
 
@@ -20,12 +25,10 @@ glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
         throw std::logic_error("Amplitude is too small.");
     }
 
-    glm::vec4 first_guess{1.0f, 0.0f, 1.0f, 0.0f};
-
     ltc_nelder_mead optimizer{brdf};
     optimizer.set_amplitude(amplitude);
     optimizer.set_view_dir(view_dir);
-    auto result = optimizer.optimize(first_guess);
+    auto result = optimizer.optimize(initial_parameters);
 
     return result;
 }
