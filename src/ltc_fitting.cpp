@@ -3,35 +3,22 @@
 #include "ggx.hpp"
 #include "ltc_nelder_mead.hpp"
 
-glm::vec4 ltc_fit(brdf& brdf)
+#include "log.hpp"
+
+glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
 {
-    const auto pi = boost::math::constants::pi<float>();
-    const float min_alpha = 0.0001f;
-    const int resolution = 256;
+    const float SAFE_AMPLITUDE_THRESHOLD = 0.0001f;
 
-    for (auto i = 0; i < resolution; ++i)
-    {
-        for (auto j = 0; j < resolution; ++j)
-        {
-            const float theta = std::min(
-                pi/2.0f - 0.08f,
-                j/static_cast<float>(resolution-1)*pi/2.0f
-            );
-
-            const glm::vec3 view_dir{
-                std::sinf(theta),
-                0.0f,
-                std::cosf(theta)
-            };
-        }
-    }
-
-    return {};
-}
-
-glm::vec4 ltc_fit_single(brdf& brdf, glm::vec3 view_dir)
-{
     float amplitude = compute_distribution_norm(brdf, view_dir);
+
+    if (amplitude < SAFE_AMPLITUDE_THRESHOLD)
+    {
+        log_error() << "Amplitude is too small. "
+            << "It will result in wrong outputs. Aborting."
+            << std::endl;
+
+        throw std::logic_error("Amplitude is too small.");
+    }
 
     glm::vec4 first_guess{1.0f, 0.0f, 1.0f, 0.0f};
 

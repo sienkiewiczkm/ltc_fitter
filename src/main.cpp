@@ -1,45 +1,45 @@
 #include <cstdlib>
 #include <iostream>
 #include "fitting_settings.hpp"
-#include "ltc_fitting.hpp"
-#include "result_saving.hpp"
-#include "ltc_nelder_mead.hpp"
-#include "brdf_plot.hpp"
+#include "ltc_lookup_builder.hpp"
 #include "ggx.hpp"
 #include "ltc.hpp"
 
+#include "ltc_fitting.hpp"
+#include "brdf_plot.hpp"
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
 
+#include <boost/math/constants/constants.hpp>
+#include "log.hpp"
+
 int main(int argc, const char* argv[])
 {
-    float alpha = 0.4f;
+    try
+    {
+        fitting_settings settings;
+        if (!get_fitting_settings_from_command_line(settings, argc, argv))
+        {
+            log_error() << "failed to set fitting settings, aborting"
+                << std::endl;
+            return EXIT_FAILURE;
+        }
 
-    ggx ggx;
-    ggx.set_alpha(alpha);
+        print_fitting_settings(settings);
+        auto result = build_lookup(settings);
+    }
+    catch (std::exception& exc)
+    {
+        log_error() << "Exception: " << exc.what() << std::endl;
+        return EXIT_FAILURE;
+    }
+    catch (...)
+    {
+        log_error() << "Unknown exception has been thrown. Aborting."
+            << std::endl;
 
-    glm::vec3 view_dir{-1.0f, 2.0f, 0.0f};
-    view_dir = glm::normalize(view_dir);
-
-    brdf_plot plot;
-    plot.set_view_dir(view_dir);
-    plot.export_png(&ggx, "test.png");
-
-    std::cerr << "Fitting started." << std::endl;
-
-    auto parameters = ltc_fit_single(ggx, view_dir);
-
-    std::cerr << "Fitting complete, parameters: "
-        << glm::to_string(parameters) << std::endl;
-
-    ltc ltc;
-    ltc.set_ltc_matrix({
-        {parameters.x, parameters.y, 0.0f},
-        {parameters.w, 1.0f, 0.0f},
-        {0.0f, 0.0f, parameters.z}
-    });
-
-    plot.export_png(&ltc, "test_ltc.png");
+        return EXIT_FAILURE;
+    }
 
     return EXIT_SUCCESS;
 }

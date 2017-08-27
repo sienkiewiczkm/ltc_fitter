@@ -1,17 +1,9 @@
 #pragma once
 #include <vector>
 #include "glm/glm.hpp"
-#include "fitting_settings.hpp"
 #include "brdf.hpp"
 
-struct fitting_result
-{
-    fitting_settings settings;
-    std::vector<glm::vec4> transformations;
-};
-
-glm::vec4 ltc_fit(brdf& brdf);
-glm::vec4 ltc_fit_single(brdf& brdf, glm::vec3 view_dir);
+glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir);
 
 float compute_distribution_norm(
     const brdf& brdf,

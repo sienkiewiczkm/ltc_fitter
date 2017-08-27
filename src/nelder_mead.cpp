@@ -1,4 +1,5 @@
 #include "nelder_mead.hpp"
+#include "log.hpp"
 #include <iostream>
 
 const float nelder_mead::_reflection_coeff = 1.0f;
@@ -28,7 +29,7 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
     _iteration_epsilon = 0.0001f;
 
     auto iteration = 0;
-    auto max_iterations = 2000;
+    auto max_iterations = 500;
 
     for (iteration = 0; iteration < max_iterations; ++iteration)
     {
@@ -43,7 +44,7 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
     {
         // iteration limit reached
         x_opt = _simplex[_min_index];
-        std::cerr << "limit reached." << std::endl;
+        log_warning() << "Nelder-Mead iteration limit reached." << std::endl;
     }
 
     return x_opt;

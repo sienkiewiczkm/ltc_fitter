@@ -4,6 +4,7 @@
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
+#include "log.hpp"
 
 ltc_nelder_mead::ltc_nelder_mead(
     const brdf& brdf

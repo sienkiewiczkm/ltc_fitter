@@ -10,6 +10,7 @@ struct fitting_settings
     float max_roughness;
     int num_error_estimate_samples;
     int num_threads;
+    std::string brdf_method;
     std::string output_file;
 };
 

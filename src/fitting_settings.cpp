@@ -45,6 +45,11 @@ bool get_fitting_settings_from_command_line(
             "number of threads"
         )
         (
+            "brdf,b",
+            po::value<std::string>(&output.brdf_method)->default_value("ggx"),
+            "brdf method"
+        )
+        (
             "output,o",
             po::value<std::string>(&output.output_file),
             "output file"
