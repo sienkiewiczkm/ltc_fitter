@@ -68,4 +68,6 @@ fitting_result build_lookup(const fitting_settings& settings)
     }
 
     log_info() << "Fitting process completed." << std::endl;
+
+    return result;
 }

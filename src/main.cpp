@@ -4,6 +4,7 @@
 #include "ltc_lookup_builder.hpp"
 #include "ggx.hpp"
 #include "ltc.hpp"
+#include "hdr_exporter.hpp"
 
 #include "ltc_fitting.hpp"
 #include "brdf_plot.hpp"
@@ -27,6 +28,8 @@ int main(int argc, const char* argv[])
 
         print_fitting_settings(settings);
         auto result = build_lookup(settings);
+
+        export_to_hdr(settings.output_file, result);
     }
     catch (std::exception& exc)
     {

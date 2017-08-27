@@ -14,6 +14,7 @@ add_executable(
     src/brdf_plot.cpp
     src/fitting_settings.cpp
     src/ggx.cpp
+    src/hdr_exporter.cpp
     src/helpers.cpp
     src/log.cpp
     src/ltc.cpp
