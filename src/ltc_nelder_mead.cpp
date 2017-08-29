@@ -23,9 +23,9 @@ float ltc_nelder_mead::estimate_error(glm::vec4 parameters)
     ltc ltc;
     ltc.set_amplitude(_amplitude);
     ltc.set_ltc_matrix({
-        {parameters.x, parameters.y, 0.0f},
-        {parameters.w, 1.0f, 0.0f},
-        {0.0f, 0.0f, parameters.z}
+        {parameters.x, 0.0f,         parameters.w},
+        {0.0f,         parameters.z, 0.0f},
+        {parameters.y, 0.0f,         1.0f}
     });
 
     for (auto i = 0; i < num_samples; ++i)

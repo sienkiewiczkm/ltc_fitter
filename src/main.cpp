@@ -20,7 +20,6 @@ int main(int argc, const char* argv[])
 {
     test_all();
 
-    /*
     try
     {
         fitting_settings settings;
@@ -48,7 +47,6 @@ int main(int argc, const char* argv[])
 
         return EXIT_FAILURE;
     }
-    */
 
     return EXIT_SUCCESS;
 }

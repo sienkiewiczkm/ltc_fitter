@@ -1,7 +1,10 @@
+#define GLM_ENABLE_EXPERIMENTAL
+
 #include "ltc_fitting.hpp"
 #include "boost/math/constants/constants.hpp"
 #include "ggx.hpp"
 #include "ltc_nelder_mead.hpp"
+#include "glm/gtx/string_cast.hpp"
 
 #include "log.hpp"
 
@@ -13,9 +16,12 @@ glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
 
     if (amplitude < SAFE_AMPLITUDE_THRESHOLD)
     {
-        log_error() << "Amplitude is too small. "
+        log_error() << "BRDF amplitude is too small. "
             << "It will result in wrong outputs. Aborting."
             << std::endl;
+
+        log_error() << "View dir" << glm::to_string(view_dir);
+        log_error() << "Amplitude = " << amplitude << std::endl;
 
         throw std::logic_error("Amplitude is too small.");
     }

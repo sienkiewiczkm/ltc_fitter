@@ -46,7 +46,7 @@ fitting_result build_lookup(const fitting_settings& settings)
         const auto pi = boost::math::constants::pi<float>();
         auto angle = glm::mix(0.005f, pi/4.0f, angle_perc);
 
-        glm::vec3 view_dir{std::sinf(angle), std::cosf(angle), 0.0f};
+        glm::vec3 view_dir{std::cosf(angle), 0.0f, std::sinf(angle)};
 
         auto work_percent = (rough_frag*settings.resolution + angle_frag)
             /static_cast<float>(settings.resolution*settings.resolution);
