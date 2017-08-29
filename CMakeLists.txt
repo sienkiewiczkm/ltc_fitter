@@ -26,6 +26,7 @@ add_executable(
     src/raycasting.cpp
     src/result_saving.cpp
     src/stb_implementation.c
+    src/tests.cpp
 )
 
 target_link_libraries(

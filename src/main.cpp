@@ -14,8 +14,13 @@
 #include <boost/math/constants/constants.hpp>
 #include "log.hpp"
 
+#include "tests.hpp"
+
 int main(int argc, const char* argv[])
 {
+    test_all();
+
+    /*
     try
     {
         fitting_settings settings;
@@ -43,6 +48,7 @@ int main(int argc, const char* argv[])
 
         return EXIT_FAILURE;
     }
+    */
 
     return EXIT_SUCCESS;
 }

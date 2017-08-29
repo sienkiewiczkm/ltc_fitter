@@ -39,13 +39,14 @@ void brdf_plot::setup_camera()
     _sphere_origin = {0.0, 0.0f, 0.0f};
     _sphere_radius = 1.0f;
 
-    _eye_position = 1.2f * glm::normalize(glm::vec3{1.0f, 1.0f, -1.0f});
+    _eye_position = 1.2f * glm::normalize(glm::vec3{-1.0f, 1.0f, 1.0f});
     _eye_target = {0.0f, 0.0f, 0.0f};
 
+    glm::vec3 up_vector{0.0f, 0.0f, 1.0f};
     glm::mat4 view_matrix = glm::lookAt(
         _eye_position,
         _sphere_origin,
-        glm::vec3{0.0f, 1.0f, 0.0f}
+        up_vector
     );
 
     _view_matrix_inv = glm::inverse(view_matrix);
@@ -113,7 +114,7 @@ glm::vec3 brdf_plot::get_pixel_color(glm::vec2 screen_coord)
     auto intersection = ray_origin + distance * ray_direction;
     auto intersection_sphere = intersection - _sphere_origin;
 
-    if (intersection_sphere.y < 0.0f) { return {1.0f, 1.0f, 1.0f}; }
+    if (intersection_sphere.z < 0.0f) { return {1.0f, 1.0f, 1.0f}; }
 
     auto sphere_direction = glm::normalize(intersection_sphere);
 

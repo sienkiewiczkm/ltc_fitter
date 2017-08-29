@@ -63,7 +63,7 @@ float ltc::evaluate(
     }
 
     const auto pi = boost::math::constants::pi<float>();
-    float d = 1.0f / pi * std::max(0.0f, original_light_dir.y);
+    float d = 1.0f / pi * std::max(0.0f, original_light_dir.z);
 
     float result = _amplitude * d * jacobian;
 
