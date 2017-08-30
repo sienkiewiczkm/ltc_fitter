@@ -98,7 +98,7 @@ glm::vec3 compute_average_direction(
         }
     }
 
-    average_direction.z = 0.0f;
+    average_direction.y = 0.0f;
 
     return glm::normalize(average_direction);
 }
