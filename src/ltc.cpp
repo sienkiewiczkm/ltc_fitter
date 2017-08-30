@@ -90,6 +90,15 @@ glm::vec3 ltc::sample(
     return glm::normalize(_ltc_matrix * original_sample);
 }
 
+void ltc::set_ltc_parameters(const glm::vec4& parameters)
+{
+    set_ltc_matrix({
+        {parameters.x, 0.0f,         parameters.w},
+        {0.0f,         parameters.z, 0.0f},
+        {parameters.y, 0.0f,         1.0f}
+    });
+}
+
 void ltc::set_ltc_matrix(const glm::mat3& mat)
 {
     _ltc_matrix = mat;

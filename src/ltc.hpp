@@ -22,6 +22,7 @@ public:
      * Note about matrix and it's inverse. Here I assume that uninversed matrix
      * transformes vector from original (cosine) distribution to another one.
      */
+    void set_ltc_parameters(const glm::vec4& parameters);
     void set_ltc_matrix(const glm::mat3& mat);
     const glm::mat3& get_ltc_matrix() const;
     const glm::mat3& get_ltc_matrix_inv() const;

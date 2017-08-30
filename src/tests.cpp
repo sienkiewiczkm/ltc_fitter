@@ -73,10 +73,30 @@ void test_ggx_amplitude()
     auto amplitude = compute_distribution_norm(ggx, view_dir);
 
     log_info() << "Test - GGX amplitude test started..." << std::endl;
-
     log_info() << " Norm = " << amplitude << std::endl;
-
     log_info() << "Test - GGX amplitude test completed." << std::endl;
+}
+
+void test_simple_ggx_fit()
+{
+    log_info() << "VISUAL TEST: test_simple_ggx_fit started." << std::endl;
+
+    ggx ggx;
+    ggx.set_alpha(0.15f);
+
+    auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});
+    auto parameters = ltc_fit(ggx, view_dir);
+
+    ltc ltc;
+    ltc.set_ltc_parameters(parameters);
+
+    brdf_plot plot;
+    plot.set_view_dir(view_dir);
+    plot.set_resolution(512);
+    plot.export_png(&ggx, "test_simple_ggx_fit_ggx.png");
+    plot.export_png(&ltc, "test_simple_ggx_fit_ltc.png");
+
+    log_info() << "VISUAL TEST: test_simple_ggx_fit completed." << std::endl;
 }
 
 void test_all()
@@ -85,5 +105,6 @@ void test_all()
     test_export_image();
     test_untransformed_ltc_amplitude();
     test_ggx_amplitude();
+    test_simple_ggx_fit();
 }
 
