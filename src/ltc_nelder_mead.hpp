@@ -10,6 +10,10 @@ public:
 
     void set_amplitude(float amplitude) { _amplitude = amplitude; }
     void set_view_dir(const glm::vec3& view_dir) { _view_dir = view_dir; }
+    void set_base_frame(const glm::mat3& base_frame)
+    {
+        _base_frame = base_frame;
+    }
 
 protected:
     virtual float estimate_error(glm::vec4 parameters);
@@ -23,4 +27,5 @@ private:
     const brdf& _brdf;
     float _amplitude;
     glm::vec3 _view_dir;
+    glm::mat3 _base_frame;
 };

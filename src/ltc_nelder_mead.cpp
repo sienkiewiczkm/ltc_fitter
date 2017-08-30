@@ -23,6 +23,7 @@ float ltc_nelder_mead::estimate_error(glm::vec4 parameters)
     ltc ltc;
     ltc.set_amplitude(_amplitude);
     ltc.set_ltc_parameters(parameters);
+    ltc.set_base_frame(_base_frame);
 
     for (auto i = 0; i < num_samples; ++i)
     {
@@ -36,7 +37,8 @@ float ltc_nelder_mead::estimate_error(glm::vec4 parameters)
         }
     }
 
-    return total_error/static_cast<double>(num_samples*num_samples);
+    auto final_error = total_error/static_cast<double>(num_samples*num_samples);
+    return final_error;
 }
 
 double ltc_nelder_mead::estimate_partial_error(

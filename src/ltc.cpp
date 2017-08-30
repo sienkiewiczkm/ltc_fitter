@@ -20,7 +20,7 @@ float ltc::evaluate(
 ) const
 {
     // here 'original' means original clamped cosine distrubution 'space'
-    glm::vec3 transformed_light_dir = _ltc_matrix_inv * light_dir;
+    glm::vec3 transformed_light_dir = get_framed_ltc_matrix_inv() * light_dir;
     glm::vec3 original_light_dir = glm::normalize(transformed_light_dir);
     auto l = length(transformed_light_dir);
 
@@ -32,7 +32,7 @@ float ltc::evaluate(
         throw std::logic_error("Transformed light direction is degenerated");
     }
 
-    auto jacobian = _ltc_matrix_inv_determinant / (l*l*l);
+    auto jacobian = glm::determinant(get_framed_ltc_matrix_inv()) / (l*l*l);
 
     if (std::isnan(jacobian))
     {
@@ -87,7 +87,7 @@ glm::vec3 ltc::sample(
         std::cosf(theta)
     };
 
-    return glm::normalize(_ltc_matrix * original_sample);
+    return glm::normalize(get_framed_ltc_matrix() * original_sample);
 }
 
 void ltc::set_ltc_parameters(const glm::vec4& parameters)
@@ -97,6 +97,11 @@ void ltc::set_ltc_parameters(const glm::vec4& parameters)
         {0.0f,         parameters.z, 0.0f},
         {parameters.y, 0.0f,         1.0f}
     });
+}
+
+void ltc::set_base_frame(const glm::mat3& base_frame)
+{
+    _base_frame = base_frame;
 }
 
 void ltc::set_ltc_matrix(const glm::mat3& mat)
@@ -114,6 +119,16 @@ const glm::mat3& ltc::get_ltc_matrix() const
 const glm::mat3& ltc::get_ltc_matrix_inv() const
 {
     return _ltc_matrix_inv;
+}
+
+glm::mat3 ltc::get_framed_ltc_matrix() const
+{
+    return (_base_frame * _ltc_matrix);
+}
+
+glm::mat3 ltc::get_framed_ltc_matrix_inv() const
+{
+    return glm::inverse(get_framed_ltc_matrix());
 }
 
 void ltc::set_amplitude(float amplitude)

@@ -26,11 +26,20 @@ glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
         throw std::logic_error("Amplitude is too small.");
     }
 
+    auto average_direction =
+        glm::normalize(compute_average_direction(brdf, view_dir));
+
+    glm::vec3 frame_x{average_direction.z, 0.0f, -average_direction.x};
+    glm::vec3 frame_y{0.0f, 1.0f, 0.0f};
+    glm::vec3 frame_z = average_direction;
+    glm::mat3 frame{frame_x, frame_y, frame_z};
+
     glm::vec4 first_guess{1.0f, 0.0f, 1.0f, 0.0f};
 
     ltc_nelder_mead optimizer{brdf};
     optimizer.set_amplitude(amplitude);
     optimizer.set_view_dir(view_dir);
+    optimizer.set_base_frame(frame);
     auto result = optimizer.optimize(first_guess);
 
     return result;
