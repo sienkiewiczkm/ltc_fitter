@@ -21,10 +21,11 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
         i = start_parameters;
     }
 
-    _simplex[1] += glm::vec4{1.0f, 0.0f, 0.0f, 0.0f};
-    _simplex[2] += glm::vec4{0.0f, 1.0f, 0.0f, 0.0f};
-    _simplex[3] += glm::vec4{0.0f, 0.0f, 1.0f, 0.0f};
-    _simplex[4] += glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
+    float delta = 0.05f;
+    _simplex[1] += delta * glm::vec4{1.0f, 0.0f, 0.0f, 0.0f};
+    _simplex[2] += delta * glm::vec4{0.0f, 1.0f, 0.0f, 0.0f};
+    _simplex[3] += delta * glm::vec4{0.0f, 0.0f, 1.0f, 0.0f};
+    _simplex[4] += delta * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
 
     _iteration_epsilon = 0.0001f;
 
@@ -44,7 +45,13 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
     {
         // iteration limit reached
         x_opt = _simplex[_min_index];
-        log_warning() << "Nelder-Mead iteration limit reached." << std::endl;
+        log_warning() << "[Nelder-Mead] Iteration limit reached ("
+            << max_iterations << ")." << std::endl;
+    }
+    else
+    {
+        log_info() << "[Nelder-Mead] Solution found after " << iteration + 1
+            << " iterations." << std::endl;
     }
 
     return x_opt;
@@ -59,13 +66,27 @@ bool nelder_mead::run_iteration()
         return false;
     }
 
+    // stop if difference between maximum and minimum value is very low
+    // read the source: Numerical Recipes in C++ (3rd Ed.)
+    float a = fabsf(_min_error);
+    float b = fabsf(_max_error);
+    if (2.0f*fabsf(a - b) < (a + b)*(1e-5f))
+        return false;
+
     auto center_of_mass = get_center_of_mass();
 
     auto pr = center_of_mass
         + _reflection_coeff * (center_of_mass - _simplex[_max_index]);
     auto pr_value = estimate_error(pr);
 
-    if (pr_value < _min_error)
+    // this almost maximum error comparison comes from Wikipedia article
+    // refer: 'One possible variation of the NM algorithm' section
+    if (pr_value >= _min_error && pr_value < _almost_max_error)
+    {
+        _simplex[_almost_max_index] = pr;
+        return true;
+    }
+    else if (pr_value < _min_error)
     {
         auto pe = center_of_mass + _expansion_coeff * (pr - center_of_mass);
         auto pe_value = estimate_error(pe);
@@ -109,7 +130,8 @@ void nelder_mead::find_min_max_error()
 {
     _min_error = std::numeric_limits<float>::max();
     _max_error = std::numeric_limits<float>::lowest();
-    _min_index = _max_index = -1;
+    _almost_max_error = std::numeric_limits<float>::lowest();
+    _min_index = _max_index = _almost_max_index = -1;
 
     for (auto i = 0; i < _simplex.size(); ++i)
     {
@@ -123,8 +145,15 @@ void nelder_mead::find_min_max_error()
 
         if (_max_error < value)
         {
+            _almost_max_error = _max_error;
+            _almost_max_index = _max_index;
             _max_error = value;
             _max_index = i;
+        }
+        else if (_almost_max_error < value)
+        {
+            _almost_max_error = value;
+            _almost_max_index = i;
         }
     }
 }

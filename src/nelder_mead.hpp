@@ -27,7 +27,7 @@ private:
     float _iteration_epsilon;
 
     std::array<glm::vec4, 5> _simplex;
-    float _min_error, _max_error;
-    int _min_index, _max_index;
+    float _min_error, _max_error, _almost_max_error;
+    int _min_index, _max_index, _almost_max_index;
 };
 
