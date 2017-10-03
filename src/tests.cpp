@@ -35,7 +35,9 @@ void test_export_image()
 
     auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});
 
-    auto amplitude = compute_distribution_norm(ggx, view_dir, 32);
+    auto amplitude =
+        calculate_average_terms(ggx, view_dir, 32).distribution_norm;
+
     log_info() << " amplitude: " << amplitude << std::endl;
 
     brdf_plot plot;
@@ -52,7 +54,7 @@ void test_untransformed_ltc_amplitude()
     ltc.set_ltc_matrix(glm::mat3{1.0f});
 
     glm::vec3 view_dir{0.0f, 0.0f, 1.0f};
-    auto amplitude = compute_distribution_norm(ltc, view_dir);
+    auto amplitude = calculate_average_terms(ltc, view_dir).distribution_norm;
 
     log_info() << "Test - Untrasformed LTC norm started." << std::endl;
     log_info() << " Norm = " << amplitude << std::endl;
@@ -73,7 +75,7 @@ void test_ggx_amplitude()
     ggx.set_alpha(0.2f);
 
     glm::vec3 view_dir{0.0f, 0.0f, 1.0f};
-    auto amplitude = compute_distribution_norm(ggx, view_dir);
+    auto amplitude = calculate_average_terms(ggx, view_dir).distribution_norm;
 
     log_info() << "Test - GGX amplitude test started..." << std::endl;
     log_info() << " Norm = " << amplitude << std::endl;
@@ -90,7 +92,7 @@ void test_simple_ggx_fit()
     auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});
 
     auto average_direction =
-        glm::normalize(compute_average_direction(ggx, view_dir));
+        calculate_average_terms(ggx, view_dir).average_direction;
 
     log_info() << " average direction: " << glm::to_string(average_direction)
         << std::endl;
