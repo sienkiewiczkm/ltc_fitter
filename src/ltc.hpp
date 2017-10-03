@@ -7,6 +7,8 @@ public:
     ltc();
     virtual ~ltc() {}
 
+    virtual std::string get_name() const { return "ltc"; }
+
     virtual float evaluate(
         const glm::vec3& light_dir,
         const glm::vec3& view_dir,
@@ -30,6 +32,8 @@ public:
     const glm::mat3& get_ltc_matrix_inv() const;
     glm::mat3 get_framed_ltc_matrix() const;
     glm::mat3 get_framed_ltc_matrix_inv() const;
+
+    glm::vec4 get_adjusted_parameters() const;
 
     void set_amplitude(float amplitude);
     float get_amplitude() const;

@@ -12,6 +12,7 @@ public:
     virtual ~ggx() {}
 
     virtual void set_alpha(float alpha) { _alpha = alpha; }
+    virtual std::string get_name() const { return "ggx"; }
 
     virtual float evaluate(
         const glm::vec3& light_dir,

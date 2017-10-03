@@ -21,7 +21,7 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
         i = start_parameters;
     }
 
-    float delta = 0.05f;
+    float delta = 0.2f;
     _simplex[1] += delta * glm::vec4{1.0f, 0.0f, 0.0f, 0.0f};
     _simplex[2] += delta * glm::vec4{0.0f, 1.0f, 0.0f, 0.0f};
     _simplex[3] += delta * glm::vec4{0.0f, 0.0f, 1.0f, 0.0f};
@@ -30,7 +30,7 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
     _iteration_epsilon = 0.0001f;
 
     auto iteration = 0;
-    auto max_iterations = 500;
+    auto max_iterations = 300;
 
     for (iteration = 0; iteration < max_iterations; ++iteration)
     {

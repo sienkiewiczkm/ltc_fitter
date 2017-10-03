@@ -1,10 +1,13 @@
 #pragma once
+#include <string>
 #include "glm/glm.hpp"
 
 class brdf
 {
 public:
     virtual ~brdf() {}
+
+    virtual std::string get_name() const = 0;
 
     virtual float evaluate(
         const glm::vec3& light_dir,

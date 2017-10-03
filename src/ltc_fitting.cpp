@@ -4,6 +4,7 @@
 #include "boost/math/constants/constants.hpp"
 #include "ggx.hpp"
 #include "ltc_nelder_mead.hpp"
+#include "ltc.hpp"
 #include "glm/gtx/string_cast.hpp"
 
 #include "log.hpp"
@@ -26,6 +27,9 @@ glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
         throw std::logic_error("Amplitude is too small.");
     }
 
+    log_debug() << "View direction = " << glm::to_string(view_dir) << std::endl;
+    log_debug() << "BRDF amplitude = " << amplitude << std::endl;
+
     auto average_direction =
         glm::normalize(compute_average_direction(brdf, view_dir));
 
@@ -42,7 +46,10 @@ glm::vec4 ltc_fit(brdf& brdf, glm::vec3 view_dir)
     optimizer.set_base_frame(frame);
     auto result = optimizer.optimize(first_guess);
 
-    return result;
+    ltc ltc;
+    ltc.set_base_frame(frame);
+    ltc.set_ltc_parameters(result);
+    return ltc.get_adjusted_parameters();
 }
 
 float compute_distribution_norm(

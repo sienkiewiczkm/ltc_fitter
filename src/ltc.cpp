@@ -22,7 +22,8 @@ float ltc::evaluate(
     // here 'original' means original clamped cosine distrubution 'space'
     glm::vec3 transformed_light_dir = get_framed_ltc_matrix_inv() * light_dir;
     glm::vec3 original_light_dir = glm::normalize(transformed_light_dir);
-    auto l = length(transformed_light_dir);
+
+    auto l = length(get_framed_ltc_matrix() * original_light_dir);
 
     const float MIN_TRANSFORMED_LENGTH = 0.0001f;
     if (l < MIN_TRANSFORMED_LENGTH) {
@@ -129,6 +130,12 @@ glm::mat3 ltc::get_framed_ltc_matrix() const
 glm::mat3 ltc::get_framed_ltc_matrix_inv() const
 {
     return glm::inverse(get_framed_ltc_matrix());
+}
+
+glm::vec4 ltc::get_adjusted_parameters() const
+{
+    auto matrix = get_framed_ltc_matrix();
+    return { matrix[0][0], matrix[2][0], matrix[0][2], matrix[1][1] };
 }
 
 void ltc::set_amplitude(float amplitude)

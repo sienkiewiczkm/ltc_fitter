@@ -3,6 +3,7 @@
 #include <string>
 #include "glm/glm.hpp"
 
+std::ostream& log_debug();
 std::ostream& log_info();
 std::ostream& log_warning();
 std::ostream& log_error();

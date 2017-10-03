@@ -6,6 +6,9 @@
 #include "log.hpp"
 #include "ltc.hpp"
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/string_cast.hpp"
+
 void test_export_simple_ltc()
 {
     log_info() << "VISUAL TEST: test_export_simple_ltc started." << std::endl;
@@ -85,6 +88,13 @@ void test_simple_ggx_fit()
     ggx.set_alpha(0.15f);
 
     auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});
+
+    auto average_direction =
+        glm::normalize(compute_average_direction(ggx, view_dir));
+
+    log_info() << " average direction: " << glm::to_string(average_direction)
+        << std::endl;
+
     auto parameters = ltc_fit(ggx, view_dir);
 
     ltc ltc;
@@ -99,6 +109,11 @@ void test_simple_ggx_fit()
     log_info() << "VISUAL TEST: test_simple_ggx_fit completed." << std::endl;
 }
 
+void test_high_angle_fit_path()
+{
+    log_error() << "no test" << std::endl;
+}
+
 void test_all()
 {
     test_export_simple_ltc();
@@ -106,5 +121,6 @@ void test_all()
     test_untransformed_ltc_amplitude();
     test_ggx_amplitude();
     test_simple_ggx_fit();
+    test_high_angle_fit_path();
 }
 

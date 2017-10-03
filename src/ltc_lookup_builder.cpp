@@ -12,6 +12,9 @@
 #include <iomanip>
 #include <sstream>
 
+#define GLM_ENABLE_EXPERIMENTAL
+#include "glm/gtx/string_cast.hpp"
+
 fitting_result build_lookup(const fitting_settings& settings)
 {
     brdf *brdf;
@@ -26,7 +29,7 @@ fitting_result build_lookup(const fitting_settings& settings)
     }
 
     log_info() << "Fitting process started." << std::endl;
-    log_info() << "  % Angle Roughness" << std::endl;
+    log_info() << "  % Angle Roughness Parameters" << std::endl;
 
     fitting_result result;
     result.settings = settings;
@@ -66,6 +69,9 @@ fitting_result build_lookup(const fitting_settings& settings)
             parameters = ltc_fit(*brdf, view_dir);
         } catch (...) {
         }
+
+        log_info() << " Calculated parameters: " << glm::to_string(parameters)
+            << std::endl;
 
         std::stringstream ss;
         ss << "fit_r" << rough_frag << "_a" << angle_frag << "_";

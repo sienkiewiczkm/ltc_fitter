@@ -3,6 +3,11 @@
 #include <iostream>
 #include <sstream>
 
+std::ostream& log_debug()
+{
+    return std::cout << get_time_str() << "  DBG ";
+}
+
 std::ostream& log_info()
 {
     return std::cout << get_time_str() << " INFO ";
