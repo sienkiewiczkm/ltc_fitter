@@ -7,14 +7,27 @@ const float nelder_mead::_expansion_coeff = 2.0f;
 const float nelder_mead::_contraction_coeff = 0.5f;
 const float nelder_mead::_shrink_coeff = 0.5f;
 
-nelder_mead::nelder_mead():
+nelder_mead::nelder_mead(int space_dimmension):
+    _space_dimmension{space_dimmension},
+    _iteration_epsilon{0.0001f},
     _simplex{}
 {
 }
 
-glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
+std::vector<float> nelder_mead::optimize(std::vector<float> start_parameters)
 {
-    auto x_opt = glm::vec4{};
+    if (start_parameters.size() != _space_dimmension)
+    {
+        log_error() << "[Nelder-Mead] Start parameters have invalid "
+            << "dimmension (is= " << start_parameters.size()
+            << "; required=" << _space_dimmension << ").";
+
+        throw std::invalid_argument("Start parameters have invalid dim.");
+    }
+
+    auto x_opt = std::vector<float>(_space_dimmension);
+
+    _simplex.resize(_space_dimmension + 1);
 
     for (auto& i : _simplex)
     {
@@ -22,10 +35,10 @@ glm::vec4 nelder_mead::optimize(glm::vec4 start_parameters)
     }
 
     float delta = 0.2f;
-    _simplex[1] += delta * glm::vec4{1.0f, 0.0f, 0.0f, 0.0f};
-    _simplex[2] += delta * glm::vec4{0.0f, 1.0f, 0.0f, 0.0f};
-    _simplex[3] += delta * glm::vec4{0.0f, 0.0f, 1.0f, 0.0f};
-    _simplex[4] += delta * glm::vec4{0.0f, 0.0f, 0.0f, 1.0f};
+    for (auto i = 1; i <= _space_dimmension; ++i)
+    {
+        _simplex[i][i-1] += delta;
+    }
 
     _iteration_epsilon = 0.0001f;
 
@@ -70,13 +83,19 @@ bool nelder_mead::run_iteration()
     // read the source: Numerical Recipes in C++ (3rd Ed.)
     float a = fabsf(_min_error);
     float b = fabsf(_max_error);
+
     if (2.0f*fabsf(a - b) < (a + b)*(1e-5f))
+    {
         return false;
+    }
 
     auto center_of_mass = get_center_of_mass();
 
-    auto pr = center_of_mass
-        + _reflection_coeff * (center_of_mass - _simplex[_max_index]);
+    auto pr = add(center_of_mass, mul(
+        sub(center_of_mass, _simplex[_max_index]),
+        _reflection_coeff
+    ));
+
     auto pr_value = estimate_error(pr);
 
     // this almost maximum error comparison comes from Wikipedia article
@@ -88,7 +107,11 @@ bool nelder_mead::run_iteration()
     }
     else if (pr_value < _min_error)
     {
-        auto pe = center_of_mass + _expansion_coeff * (pr - center_of_mass);
+        auto pe = add(center_of_mass, mul(
+            sub(pr, center_of_mass),
+            _expansion_coeff
+        ));
+
         auto pe_value = estimate_error(pe);
 
         if (pe_value < pr_value) // expansion
@@ -108,8 +131,11 @@ bool nelder_mead::run_iteration()
         }
         else
         {
-            auto pc = center_of_mass
-                + _contraction_coeff * (_simplex[_max_index] - center_of_mass);
+            auto pc = add(center_of_mass, mul(
+                sub(_simplex[_max_index], center_of_mass),
+                _contraction_coeff
+            ));
+
             auto pc_value = estimate_error(pc);
 
             if (pc_value >= _max_error)
@@ -164,21 +190,26 @@ float nelder_mead::get_simplex_norm()
 
     for (auto i = 0; i < _simplex.size(); ++i)
     {
-        auto current_norm = glm::length(_simplex[_min_index] - _simplex[i]);
+        auto current_norm = sum(sub(_simplex[_min_index], _simplex[i]));
         max_norm = std::max(max_norm, current_norm);
     }
 
     return max_norm;
 }
 
-glm::vec4 nelder_mead::get_center_of_mass()
+std::vector<float> nelder_mead::get_center_of_mass()
 {
-    glm::vec4 center_of_mass{};
-    for (auto i = 0; i < _simplex.size(); ++i)
-        if (i != _max_index)
-            center_of_mass += _simplex[i];
+    std::vector<float> center_of_mass(_space_dimmension);
 
-    center_of_mass = center_of_mass / static_cast<float>(_simplex.size()-1);
+    for (auto i = 0; i < _simplex.size(); ++i)
+    {
+        if (i != _max_index)
+        {
+            center_of_mass = add(center_of_mass, _simplex[i]);
+        }
+    }
+
+    center_of_mass = div(center_of_mass, static_cast<float>(_space_dimmension));
 
     return center_of_mass;
 }
@@ -189,8 +220,96 @@ void nelder_mead::reduce_simplex(int around)
     {
         if (i != around)
         {
-            _simplex[i] = _simplex[around]
-                + _shrink_coeff * (_simplex[i] - _simplex[around]);
+            _simplex[i] = add(_simplex[around], mul(
+                sub(_simplex[i], _simplex[around]),
+                _shrink_coeff
+            ));
         }
     }
+}
+
+std::vector<float> nelder_mead::add(
+    std::vector<float> a,
+    std::vector<float> b
+) const
+{
+    if (a.size() != b.size())
+    {
+        log_error() << "[Nelder-Mead] Add operands dimmensions do not match. "
+            << "dim(a)=" << a. size() << "; dim(b)=" << b.size();
+        throw std::invalid_argument("Operands dimmensions do not match");
+    }
+
+    std::vector<float> output(a.size());
+
+    for (auto i = 0; i < a.size(); ++i)
+    {
+        output[i] = a[i] + b[i];
+    }
+
+    return output;
+}
+
+std::vector<float> nelder_mead::sub(
+    std::vector<float> a,
+    std::vector<float> b
+) const
+{
+    if (a.size() != b.size())
+    {
+        log_error() << "[Nelder-Mead] Sub operands dimmensions do not match. "
+            << "dim(a)=" << a. size() << "; dim(b)=" << b.size();
+        throw std::invalid_argument("Operands dimmensions do not match");
+    }
+
+    std::vector<float> output(a.size());
+
+    for (auto i = 0; i < a.size(); ++i)
+    {
+        output[i] = a[i] - b[i];
+    }
+
+    return output;
+}
+
+std::vector<float> nelder_mead::mul(
+    std::vector<float> a,
+    float multipler
+) const
+{
+    std::vector<float> output(a.size());
+
+    for (auto i = 0; i < a.size(); ++i)
+    {
+        output[i] = a[i] * multipler;
+    }
+
+    return output;
+}
+
+std::vector<float> nelder_mead::div(
+    std::vector<float> a,
+    float divisor
+) const
+{
+    std::vector<float> output(a.size());
+
+    for (auto i = 0; i < a.size(); ++i)
+    {
+        output[i] = a[i] / divisor;
+    }
+
+    return output;
+}
+
+float nelder_mead::sum(std::vector<float> a) const
+{
+    float accumulator = 0.0f;
+
+    for (auto i = 0; i < a.size(); ++i)
+    {
+        accumulator += a[i];
+    }
+
+    return accumulator;
 }

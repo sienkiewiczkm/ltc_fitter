@@ -9,9 +9,41 @@
 ltc_nelder_mead::ltc_nelder_mead(
     const brdf& brdf
 ):
+    nelder_mead(4),
     _brdf{brdf},
     _amplitude{1.0f}
 {
+}
+
+glm::vec4 ltc_nelder_mead::optimize(glm::vec4 start_parameters)
+{
+    std::vector<float> input{
+        start_parameters.x,
+        start_parameters.y,
+        start_parameters.z,
+        start_parameters.w
+    };
+
+    auto result = nelder_mead::optimize(input);
+
+    if (result.size() != 4)
+    {
+        throw std::logic_error("Returned result has unexpected dimmension");
+    }
+
+    return { result[0], result[1], result[2], result[3] };
+}
+
+float ltc_nelder_mead::estimate_error(std::vector<float> parameters)
+{
+    glm::vec4 params{
+        parameters[0],
+        parameters[1],
+        parameters[2],
+        parameters[3]
+    };
+
+    return estimate_error(params);
 }
 
 float ltc_nelder_mead::estimate_error(glm::vec4 parameters)

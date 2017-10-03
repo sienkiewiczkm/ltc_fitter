@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+#include "glm/glm.hpp"
 #include "nelder_mead.hpp"
 #include "brdf.hpp"
 
@@ -8,6 +10,8 @@ public:
     ltc_nelder_mead(const brdf& brdf);
     virtual ~ltc_nelder_mead() {}
 
+    glm::vec4 optimize(glm::vec4 start_parameters);
+
     void set_amplitude(float amplitude) { _amplitude = amplitude; }
     void set_view_dir(const glm::vec3& view_dir) { _view_dir = view_dir; }
     void set_base_frame(const glm::mat3& base_frame)
@@ -16,7 +20,9 @@ public:
     }
 
 protected:
-    virtual float estimate_error(glm::vec4 parameters);
+    virtual float estimate_error(std::vector<float> parameters);
+    float estimate_error(glm::vec4 parameters);
+
     double estimate_partial_error(
         const brdf& sample_source,
         const brdf& other_brdf,
