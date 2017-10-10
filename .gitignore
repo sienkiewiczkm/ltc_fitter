@@ -1,4 +1,8 @@
-.idea/
+
+# CLion files, allow Style Settings, disallow the rest
+.idea/*
+!.idea/codeStyleSettings.xml
+
 build/
 cmake-build-debug/
 xcode/
