@@ -8,7 +8,9 @@
 
 #include "ltc_fitting.hpp"
 #include "brdf_plot.hpp"
+
 #define GLM_ENABLE_EXPERIMENTAL
+
 #include "glm/gtx/string_cast.hpp"
 
 #include <boost/math/constants/constants.hpp>
@@ -16,37 +18,37 @@
 
 #include "tests.hpp"
 
-int main(int argc, const char* argv[])
+int main(int argc, const char *argv[])
 {
-    test_all();
+  test_all();
 
-    try
+  try
+  {
+    fitting_settings settings;
+    if (!get_fitting_settings_from_command_line(settings, argc, argv))
     {
-        fitting_settings settings;
-        if (!get_fitting_settings_from_command_line(settings, argc, argv))
-        {
-            log_error() << "failed to set fitting settings, aborting"
-                << std::endl;
-            return EXIT_FAILURE;
-        }
-
-        print_fitting_settings(settings);
-        auto result = build_lookup(settings);
-
-        export_to_hdr(settings.output_file, result);
-    }
-    catch (std::exception& exc)
-    {
-        log_error() << "Exception: " << exc.what() << std::endl;
-        return EXIT_FAILURE;
-    }
-    catch (...)
-    {
-        log_error() << "Unknown exception has been thrown. Aborting."
-            << std::endl;
-
-        return EXIT_FAILURE;
+      log_error() << "failed to set fitting settings, aborting"
+        << std::endl;
+      return EXIT_FAILURE;
     }
 
-    return EXIT_SUCCESS;
+    print_fitting_settings(settings);
+    auto result = build_lookup(settings);
+
+    export_to_hdr(settings.output_file, result);
+  }
+  catch (std::exception &exc)
+  {
+    log_error() << "Exception: " << exc.what() << std::endl;
+    return EXIT_FAILURE;
+  }
+  catch (...)
+  {
+    log_error() << "Unknown exception has been thrown. Aborting."
+      << std::endl;
+
+    return EXIT_FAILURE;
+  }
+
+  return EXIT_SUCCESS;
 }

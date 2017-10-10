@@ -4,6 +4,6 @@
 
 std::string get_time_str()
 {
-    auto now = boost::posix_time::second_clock::local_time();
-    return boost::posix_time::to_simple_string(now);
+  auto now = boost::posix_time::second_clock::local_time();
+  return boost::posix_time::to_simple_string(now);
 }

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "ltc_fitting.hpp"
 #include "ltc_lookup_builder.hpp"
 
