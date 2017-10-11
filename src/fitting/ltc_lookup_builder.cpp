@@ -35,11 +35,8 @@ fitting_result build_lookup(const fitting_settings &settings)
   fitting_result result;
   result.settings = settings;
 
-  for (auto rough_frag = 3; rough_frag < settings.resolution; ++rough_frag)
+  for (auto rough_frag = 0; rough_frag < settings.resolution; ++rough_frag)
   {
-    // TODO: Remove this hack.
-    if (rough_frag > 4) break;
-
     const auto rough_perc = rough_frag / static_cast<float>(settings.resolution - 1);
     const auto roughness = glm::mix(
       settings.min_roughness,

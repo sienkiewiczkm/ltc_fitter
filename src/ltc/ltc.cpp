@@ -21,53 +21,26 @@ float ltc::evaluate(
 ) const
 {
   // here 'original' means original clamped cosine distrubution 'space'
-  glm::vec3 transformed_light_dir = get_framed_ltc_matrix_inv() * light_dir;
-  glm::vec3 original_light_dir = glm::normalize(transformed_light_dir);
-
-  auto l = glm::length(get_framed_ltc_matrix() * original_light_dir);
+  glm::vec3 original_light_dir = glm::normalize(get_framed_ltc_matrix_inv() * light_dir);
+  auto len = glm::length(get_framed_ltc_matrix() * original_light_dir);
 
   const float MIN_TRANSFORMED_LENGTH = 0.0001f;
-  if (l < MIN_TRANSFORMED_LENGTH)
+  if (len < MIN_TRANSFORMED_LENGTH)
   {
-    log_error() << "Transformed light direction to original space "
-      << "is degenerated (with length = 0)." << std::endl;
-
+    log_error() << "Transformed light direction to original space is degenerated (with length = 0)." << std::endl;
     throw std::logic_error("Transformed light direction is degenerated");
   }
 
-  auto jacobian = glm::determinant(get_framed_ltc_matrix()) / (l * l * l);
+  auto jacobian = glm::determinant(get_framed_ltc_matrix()) / (len * len * len);
 
   if (std::isnan(jacobian))
   {
     log_error() << "LTC Jacobian is NaN. Aborting." << std::endl;
-    log_error() << " Readable information:" << std::endl;
-    log_error() << "  view_dir = " << glm::to_string(view_dir) << std::endl;
-    log_error() << "  ltc = " << glm::to_string(_ltc_matrix) << std::endl;
-    log_error() << "  ltc_inv = " << glm::to_string(_ltc_matrix_inv)
-      << std::endl;
-    log_error() << "  transformed_view_dir = "
-      << glm::to_string(transformed_light_dir) << std::endl;
-    log_error() << "  original_view_dir = "
-      << glm::to_string(original_light_dir) << std::endl;
-    log_error() << " Exact parameters for further debugging: " << std::endl;
-    log_error() << "  amplitude = " << std::hexfloat << _amplitude
-      << std::endl;
-    log_error() << "  light_dir = " << format_exact_vector(light_dir)
-      << std::endl;
-    log_error() << "  view_dir = " << format_exact_vector(view_dir)
-      << std::endl;
-    log_error() << "  ltc[0] = " << format_exact_vector(_ltc_matrix[0])
-      << std::endl;
-    log_error() << "  ltc[1] = " << format_exact_vector(_ltc_matrix[1])
-      << std::endl;
-    log_error() << "  ltc[2] = " << format_exact_vector(_ltc_matrix[2])
-      << std::endl;
     throw std::logic_error("Jacobian is NaN");
   }
 
   const auto pi = boost::math::constants::pi<float>();
   float d = 1.0f / pi * std::max(0.0f, original_light_dir.z);
-
   float result = _amplitude * d / jacobian;
 
   probability_density_function = result / _amplitude;
@@ -75,10 +48,7 @@ float ltc::evaluate(
   return result;
 }
 
-glm::vec3 ltc::sample(
-  const glm::vec3 &view_dir,
-  const glm::vec2 &random_parameters
-) const
+glm::vec3 ltc::sample(const glm::vec3 &view_dir, const glm::vec2 &random_parameters) const
 {
   const auto pi = boost::math::constants::pi<float>();
   const float theta = std::acosf(std::sqrtf(random_parameters.x));

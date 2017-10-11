@@ -49,14 +49,13 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
   auto result_vector = optimizer.optimize({first_guess.x, first_guess.y, first_guess.z});
   glm::vec3 result{result_vector[0], result_vector[1], result_vector[2]};
 
+  log_info() << "result: " << glm::to_string(result) << std::endl;
+
   if (force_isotropic)
   {
     result.y = result.x;
     result.z = 0.0f;
   }
-
-  // magic frame test
-  //result = {0.3f, 0.3f, 0.0f};
 
   ltc ltc;
   ltc.set_amplitude(average_terms.distribution_norm);
