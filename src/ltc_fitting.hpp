@@ -3,6 +3,7 @@
 #include <vector>
 #include "glm/glm.hpp"
 #include "brdf.hpp"
+#include "ltc.hpp"
 
 struct ltc_average_terms
 {
@@ -29,10 +30,5 @@ struct ltc_average_terms
   glm::vec3 average_direction;
 };
 
-glm::vec4 ltc_fit(brdf &brdf, glm::vec3 view_dir);
-
-ltc_average_terms calculate_average_terms(
-  const brdf &brdf,
-  const glm::vec3 &view_dir,
-  const int num_samples = 64
-);
+ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm::vec3 &first_guess);
+ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &view_dir, const int num_samples = 64);

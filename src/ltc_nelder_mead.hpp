@@ -31,9 +31,16 @@ public:
     _base_frame = base_frame;
   }
 
+  void set_isotropy_forcing(bool force_isotropy)
+  {
+    _force_isotropy = force_isotropy;
+  }
+
+  glm::vec3 optimize(glm::vec3 start_parameters);
+
 protected:
   virtual float estimate_error(std::vector<float> parameters);
-  float estimate_error(glm::vec4 parameters);
+  float estimate_error(glm::vec3 parameters);
 
   double estimate_partial_error(
     const brdf &sample_source,
@@ -46,4 +53,5 @@ private:
   float _amplitude;
   glm::vec3 _view_dir;
   glm::mat3 _base_frame;
+  bool _force_isotropy;
 };

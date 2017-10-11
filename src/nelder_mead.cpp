@@ -190,7 +190,7 @@ float nelder_mead::get_simplex_norm()
 
   for (auto i = 0; i < _simplex.size(); ++i)
   {
-    auto current_norm = sum(sub(_simplex[_min_index], _simplex[i]));
+    auto current_norm = sum(abs(sub(_simplex[_min_index], _simplex[i])));
     max_norm = std::max(max_norm, current_norm);
   }
 
@@ -312,4 +312,16 @@ float nelder_mead::sum(std::vector<float> a) const
   }
 
   return accumulator;
+}
+
+std::vector<float> nelder_mead::abs(std::vector<float> input)
+{
+  std::vector<float> output(input.size());
+
+  for (auto i = 0; i < input.size(); ++i)
+  {
+    output[i] = std::abs(input[i]);
+  }
+
+  return output;
 }

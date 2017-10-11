@@ -34,6 +34,7 @@ private:
   std::vector<float> mul(std::vector<float> input, float multipler) const;
   std::vector<float> div(std::vector<float> input, float divisor) const;
   float sum(std::vector<float> a) const;
+  std::vector<float> abs(std::vector<float> input);
 
   int _space_dimmension;
   float _iteration_epsilon;

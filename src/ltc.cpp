@@ -24,7 +24,7 @@ float ltc::evaluate(
   glm::vec3 transformed_light_dir = get_framed_ltc_matrix_inv() * light_dir;
   glm::vec3 original_light_dir = glm::normalize(transformed_light_dir);
 
-  auto l = length(get_framed_ltc_matrix() * original_light_dir);
+  auto l = glm::length(get_framed_ltc_matrix() * original_light_dir);
 
   const float MIN_TRANSFORMED_LENGTH = 0.0001f;
   if (l < MIN_TRANSFORMED_LENGTH)
@@ -35,7 +35,7 @@ float ltc::evaluate(
     throw std::logic_error("Transformed light direction is degenerated");
   }
 
-  auto jacobian = glm::determinant(get_framed_ltc_matrix_inv()) / (l * l * l);
+  auto jacobian = glm::determinant(get_framed_ltc_matrix()) / (l * l * l);
 
   if (std::isnan(jacobian))
   {
@@ -68,7 +68,7 @@ float ltc::evaluate(
   const auto pi = boost::math::constants::pi<float>();
   float d = 1.0f / pi * std::max(0.0f, original_light_dir.z);
 
-  float result = _amplitude * d * jacobian;
+  float result = _amplitude * d / jacobian;
 
   probability_density_function = result / _amplitude;
 
@@ -93,12 +93,12 @@ glm::vec3 ltc::sample(
   return glm::normalize(get_framed_ltc_matrix() * original_sample);
 }
 
-void ltc::set_ltc_parameters(const glm::vec4 &parameters)
+void ltc::set_ltc_parameters(const glm::vec3 &parameters)
 {
   set_ltc_matrix({
-    {parameters.x, 0.0f,         parameters.w},
-    {0.0f,         parameters.z, 0.0f},
-    {parameters.y, 0.0f,         1.0f}
+    {parameters.x, 0.0f,         0.0f},
+    {0.0f,         parameters.y, 0.0f},
+    {parameters.z, 0.0f,         1.0f}
   });
 }
 
@@ -134,12 +134,6 @@ glm::mat3 ltc::get_framed_ltc_matrix_inv() const
   return glm::inverse(get_framed_ltc_matrix());
 }
 
-glm::vec4 ltc::get_adjusted_parameters() const
-{
-  auto matrix = get_framed_ltc_matrix();
-  return {matrix[0][0], matrix[2][0], matrix[0][2], matrix[1][1]};
-}
-
 void ltc::set_amplitude(float amplitude)
 {
   _amplitude = amplitude;
@@ -148,4 +142,49 @@ void ltc::set_amplitude(float amplitude)
 float ltc::get_amplitude() const
 {
   return _amplitude;
+}
+
+ltc_store_data ltc::get_store_data() const
+{
+  auto framed_mtx = get_framed_ltc_matrix();
+
+  float a = framed_mtx[0][0];
+  float b = framed_mtx[0][2];
+  float c = framed_mtx[1][1];
+  float d = framed_mtx[2][0];
+  float e = framed_mtx[2][2];
+
+  // Rescaled inverse of m:
+  // a 0 b   inverse  c*e     0     -b*c
+  // 0 c 0     ==>     0  a*e - b*d   0
+  // d 0 e           -c*d     0      a*c
+
+  float t0 = c * e;
+  float t1 = -b * c;
+  float t2 = a * e - b * d;
+  float t3 = -c * d;
+  float t4 = a * c;
+
+  ltc_store_data store_data;
+  store_data.matrix_parameters = {t0, t1, t2, t3, t4};
+  store_data.distribution_norm = _amplitude;
+  store_data.fresnel_term = _fresnel;
+
+  return store_data;
+}
+
+void ltc::set_store_data(const ltc_store_data &data)
+{
+  _amplitude = data.distribution_norm;
+  _fresnel = data.fresnel_term;
+
+  // TODO: Inverse may cause loss of data. It is done at least once during fitting process.
+  const auto &mtx = data.matrix_parameters;
+  set_ltc_matrix(glm::inverse(glm::mat3{
+    {mtx[0], 0.0f,   mtx[1]},
+    {0.0f,   mtx[2], 0.0f},
+    {mtx[3], 0.0f,   mtx[4]}
+  }));
+
+  _base_frame = glm::mat4{};
 }

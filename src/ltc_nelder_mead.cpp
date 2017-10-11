@@ -10,46 +10,43 @@
 ltc_nelder_mead::ltc_nelder_mead(
   const brdf &brdf
 ):
-  nelder_mead(4),
+  nelder_mead(3),
   _brdf{brdf},
   _amplitude{1.0f}
 {
 }
 
-glm::vec4 ltc_nelder_mead::optimize(glm::vec4 start_parameters)
+glm::vec3 ltc_nelder_mead::optimize(glm::vec3 start_parameters)
 {
-  std::vector<float> input{
-    start_parameters.x,
-    start_parameters.y,
-    start_parameters.z,
-    start_parameters.w
-  };
+  std::vector<float> input{start_parameters.x, start_parameters.y, start_parameters.z};
 
   auto result = nelder_mead::optimize(input);
 
-  if (result.size() != 4)
+  if (result.size() != 3)
   {
     throw std::logic_error("Returned result has unexpected dimmension");
   }
 
-  return {result[0], result[1], result[2], result[3]};
+  return {result[0], result[1], result[2]};
 }
 
 float ltc_nelder_mead::estimate_error(std::vector<float> parameters)
 {
-  glm::vec4 params{
-    parameters[0],
-    parameters[1],
-    parameters[2],
-    parameters[3]
-  };
-
+  glm::vec3 params{parameters[0], parameters[1], parameters[2]};
   return estimate_error(params);
 }
 
-float ltc_nelder_mead::estimate_error(glm::vec4 parameters)
+float ltc_nelder_mead::estimate_error(glm::vec3 parameters)
 {
-  const int num_samples = 16;
+  const int num_samples = 32;
+
+  if (_force_isotropy)
+  {
+    parameters.y = parameters.x;
+    parameters.z = 0.0f;
+  }
+
+  parameters = glm::max(parameters, {0.05f, 0.05f, 0.0f});
 
   float total_error = 0.0f;
 
@@ -84,17 +81,8 @@ double ltc_nelder_mead::estimate_partial_error(
 
   float source_pdf, other_pdf;
 
-  auto source_value = sample_source.evaluate(
-    light_dir,
-    _view_dir,
-    source_pdf
-  );
-
-  auto other_value = other_brdf.evaluate(
-    light_dir,
-    _view_dir,
-    other_pdf
-  );
+  auto source_value = sample_source.evaluate(light_dir, _view_dir, source_pdf);
+  auto other_value = other_brdf.evaluate(light_dir, _view_dir, other_pdf);
 
   source_pdf = fabs(source_pdf);
   other_pdf = fabs(other_pdf);

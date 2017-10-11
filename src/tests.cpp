@@ -91,16 +91,23 @@ void test_simple_ggx_fit()
 
     auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});
 
-    auto average_direction =
-        calculate_average_terms(ggx, view_dir).average_direction;
+    auto average_direction = calculate_average_terms(ggx, view_dir).average_direction;
+    log_info() << " average direction: " << glm::to_string(average_direction) << std::endl;
 
-    log_info() << " average direction: " << glm::to_string(average_direction)
-        << std::endl;
+    glm::vec3 first_guess = glm::vec3{1.0f, 1.0f, 0.0f};
+    auto data = ltc_fit(ggx, view_dir, true, first_guess);
 
-    auto parameters = ltc_fit(ggx, view_dir);
+    log_info() << "Store data:" << std::endl;
+    log_info() << " a=" << data.matrix_parameters[0] << std::endl;
+    log_info() << " b=" << data.matrix_parameters[1] << std::endl;
+    log_info() << " c=" << data.matrix_parameters[2] << std::endl;
+    log_info() << " d=" << data.matrix_parameters[3] << std::endl;
+    log_info() << " e=" << data.matrix_parameters[4] << std::endl;
+    log_info() << " fresnel=" << data.fresnel_term << std::endl;
+    log_info() << " magnitude=" << data.distribution_norm << std::endl;
 
     ltc ltc;
-    ltc.set_ltc_parameters(parameters);
+    ltc.set_store_data(data);
 
     brdf_plot plot;
     plot.set_view_dir(view_dir);
@@ -113,7 +120,6 @@ void test_simple_ggx_fit()
 
 void test_high_angle_fit_path()
 {
-    log_error() << "no test" << std::endl;
 }
 
 void test_all()
@@ -125,4 +131,5 @@ void test_all()
     test_simple_ggx_fit();
     test_high_angle_fit_path();
 }
+
 

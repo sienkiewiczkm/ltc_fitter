@@ -31,9 +31,13 @@ float ggx::evaluate(const glm::vec3 &light_dir, const glm::vec3 &view_dir, float
   float n_dot_v = std::max(glm::dot(_normal, view_dir), 0.0f);
   float denominator = 4.0f * n_dot_l * n_dot_v + 0.001f;
 
-  float n_dot_h = std::max(glm::dot(_normal, half_vector), 0.0f);
-  float v_dot_h = std::max(glm::dot(view_dir, half_vector), 0.0f);
-  probability_density_function = (ndf * n_dot_h) / (4.0f * v_dot_h);
+  //float n_dot_h = std::max(glm::dot(_normal, half_vector), 0.0f);
+  //float v_dot_h = std::max(glm::dot(view_dir, half_vector), 0.0f);
+  //probability_density_function = (ndf * n_dot_h) / (4.0f * v_dot_h);
+
+  // TODO: Probably wrong, just uniform, see LTC sampling for details, it should be uniform
+  const auto pi = boost::math::constants::pi<float>();
+  probability_density_function = 1.0f / 2.0f / pi;
 
   return nominator / denominator;
 }
@@ -58,6 +62,7 @@ glm::vec3 ggx::sample(
 
   const auto pi = boost::math::constants::pi<float>();
 
+  /*
   float phi = 2.0f * pi * random_parameters.x;
 
   auto cos_theta = std::sqrtf((1 - random_parameters.y) / (1 + (_alpha * _alpha - 1) * random_parameters.y));
@@ -78,11 +83,25 @@ glm::vec3 ggx::sample(
   auto tangent_y = glm::cross(_normal, tangent_x);
 
   return tangent_x * h.x + tangent_y * h.y + _normal * h.z;
+  */
+
+  // Uniform Sampling on sphere
+  // https://math.stackexchange.com/a/626563
+  return {
+    2.0f * std::sqrtf(random_parameters.x * (1 - random_parameters.x))
+      * std::cosf(2 * pi * random_parameters.y),
+    2.0f * std::sqrtf(random_parameters.x * (1 - random_parameters.x))
+      * std::sinf(2 * pi * random_parameters.y),
+    1.0f - 2.0f * random_parameters.x
+  };
 }
 
 float ggx::pdf(float theta, float phi) const
 {
-  return 0.0f;
+  // TODO: probably plain wrong
+  const auto pi = boost::math::constants::pi<float>();
+  auto probability_density_function = 1.0f / 2.0f / pi;
+  return probability_density_function;
 }
 
 float ggx::normal_ggx(glm::vec3 normal, glm::vec3 half_vector, float a) const
@@ -115,4 +134,3 @@ float ggx::geometry_smith(glm::vec3 normal, glm::vec3 view, glm::vec3 light, flo
   float ggx2 = geometry_schlick_ggx(n_dot_v, k);
   return ggx1 * ggx2;
 }
-

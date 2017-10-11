@@ -1,5 +1,6 @@
 #pragma once
 
+// TODO: Export automatically verifable tests into separate test module
 void test_export_simple_ltc();
 void test_export_image();
 void test_untransformed_ltc_amplitude();
