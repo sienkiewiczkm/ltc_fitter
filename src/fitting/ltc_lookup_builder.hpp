@@ -2,7 +2,7 @@
 
 #include <vector>
 #include "glm/glm.hpp"
-#include "fitting_settings.hpp"
+#include "../fitting_settings.hpp"
 
 struct fitting_result
 {

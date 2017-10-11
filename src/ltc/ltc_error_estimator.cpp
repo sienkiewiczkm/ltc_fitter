@@ -1,11 +1,11 @@
 #include "ltc_error_estimator.hpp"
-#include "../ltc.hpp"
+#include "ltc.hpp"
 #include <iostream>
 
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "glm/gtx/string_cast.hpp"
-#include "../log.hpp"
+#include "../utils/log.hpp"
 
 ltc_error_estimator::ltc_error_estimator(
   const brdf &brdf

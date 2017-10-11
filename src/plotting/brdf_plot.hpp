@@ -2,7 +2,7 @@
 
 #include <string>
 #include "glm/glm.hpp"
-#include "brdf.hpp"
+#include "../brdf/brdf.hpp"
 
 class brdf_plot
 {

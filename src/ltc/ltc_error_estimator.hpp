@@ -3,7 +3,7 @@
 #include <vector>
 #include "glm/glm.hpp"
 #include "../numerical/error_estimator.hpp"
-#include "../brdf.hpp"
+#include "../brdf/brdf.hpp"
 
 class ltc_error_estimator: public error_estimator
 {

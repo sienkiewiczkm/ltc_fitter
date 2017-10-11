@@ -1,5 +1,5 @@
 #include "ltc_constraints_calculator.hpp"
-#include "../log.hpp"
+#include "../utils/log.hpp"
 #include <iostream>
 
 std::vector<float> ltc_constraints_calculator::calculate_constraints(const std::vector<float> &parameters)

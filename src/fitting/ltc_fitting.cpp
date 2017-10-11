@@ -2,15 +2,15 @@
 
 #include "ltc_fitting.hpp"
 #include "boost/math/constants/constants.hpp"
-#include "ggx.hpp"
-#include "ltc/ltc_error_estimator.hpp"
-#include "ltc.hpp"
+#include "../brdf/ggx.hpp"
+#include "../ltc/ltc_error_estimator.hpp"
+#include "../ltc/ltc.hpp"
 #include "glm/gtx/string_cast.hpp"
 
-#include "log.hpp"
-#include "numerical/nelder_mead.hpp"
-#include "numerical/penalty_optimizer.hpp"
-#include "numerical/logarithmic_penalty_error_estimator.hpp"
+#include "../utils/log.hpp"
+#include "../numerical/nelder_mead.hpp"
+#include "../numerical/penalty_optimizer.hpp"
+#include "../numerical/logarithmic_penalty_error_estimator.hpp"
 
 ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm::vec3 &first_guess)
 {

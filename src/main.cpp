@@ -1,22 +1,22 @@
 #include <cstdlib>
 #include <iostream>
 #include "fitting_settings.hpp"
-#include "ltc_lookup_builder.hpp"
-#include "ggx.hpp"
-#include "ltc.hpp"
-#include "hdr_exporter.hpp"
+#include "fitting/ltc_lookup_builder.hpp"
+#include "brdf/ggx.hpp"
+#include "ltc/ltc.hpp"
+#include "exporters/hdr_exporter.hpp"
 
-#include "ltc_fitting.hpp"
-#include "brdf_plot.hpp"
+#include "fitting/ltc_fitting.hpp"
+#include "plotting/brdf_plot.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "glm/gtx/string_cast.hpp"
 
 #include <boost/math/constants/constants.hpp>
-#include "log.hpp"
+#include "utils/log.hpp"
 
-#include "tests.hpp"
+#include "tests/tests.hpp"
 
 int main(int argc, const char *argv[])
 {

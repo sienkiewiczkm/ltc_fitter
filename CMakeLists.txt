@@ -8,44 +8,49 @@ include_directories(${PROJECT_SOURCE_DIR}/dependencies/glm)
 include_directories(${PROJECT_SOURCE_DIR}/dependencies/stb)
 
 add_executable(${PROJECT_NAME}
-  src/brdf.hpp
-  src/brdf_plot.cpp
-  src/brdf_plot.hpp
+  src/brdf/brdf.hpp
+  src/brdf/ggx.cpp
+  src/brdf/ggx.hpp
+  src/exporters/hdr_exporter.cpp
+  src/exporters/hdr_exporter.hpp
+  src/fitting/ltc_fitting.cpp
+  src/fitting/ltc_fitting.hpp
+  src/fitting/ltc_lookup_builder.cpp
+  src/fitting/ltc_lookup_builder.hpp
   src/fitting_settings.cpp
   src/fitting_settings.hpp
-  src/ggx.cpp
-  src/ggx.hpp
-  src/hdr_exporter.cpp
-  src/hdr_exporter.hpp
-  src/helpers.cpp
-  src/helpers.hpp
-  src/log.cpp
-  src/log.hpp
-  src/ltc.cpp
-  src/ltc.hpp
+  src/ltc/ltc.cpp
+  src/ltc/ltc.hpp
+  src/ltc/ltc_constraints_calculator.cpp
+  src/ltc/ltc_constraints_calculator.hpp
   src/ltc/ltc_error_estimator.cpp
   src/ltc/ltc_error_estimator.hpp
-  src/ltc_fitting.cpp
-  src/ltc_fitting.hpp
-  src/ltc_lookup_builder.cpp
-  src/ltc_lookup_builder.hpp
   src/main.cpp
+  src/numerical/constraints_calculator.hpp
   src/numerical/error_estimator.hpp
+  src/numerical/logarithmic_penalty_error_estimator.cpp
+  src/numerical/logarithmic_penalty_error_estimator.hpp
   src/numerical/nelder_mead.cpp
   src/numerical/nelder_mead.hpp
   src/numerical/penalty_error_estimator.hpp
-  src/numerical/logarithmic_penalty_error_estimator.cpp
-  src/numerical/logarithmic_penalty_error_estimator.hpp
+  src/numerical/penalty_optimizer.cpp
+  src/numerical/penalty_optimizer.hpp
   src/numerical/vector_utils.cpp
   src/numerical/vector_utils.hpp
-  src/raycasting.cpp
-  src/raycasting.hpp
-  src/result_saving.cpp
-  src/result_saving.hpp
-  src/stb_implementation.c
-  src/tests.cpp
-  src/tests.hpp
-  src/numerical/constraints_calculator.hpp src/numerical/penalty_optimizer.cpp src/numerical/penalty_optimizer.hpp src/ltc/ltc_constraints_calculator.cpp src/ltc/ltc_constraints_calculator.hpp)
+  src/plotting/brdf_plot.cpp
+  src/plotting/brdf_plot.hpp
+  src/plotting/raycasting.cpp
+  src/plotting/raycasting.hpp
+  src/plotting/result_saving.cpp
+  src/plotting/result_saving.hpp
+  src/tests/tests.cpp
+  src/tests/tests.hpp
+  src/utils/helpers.cpp
+  src/utils/helpers.hpp
+  src/utils/log.cpp
+  src/utils/log.hpp
+  src/utils/stb_implementation.c
+)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)

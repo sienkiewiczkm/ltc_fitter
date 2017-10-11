@@ -1,5 +1,5 @@
 #include "result_saving.hpp"
-#include "ltc_fitting.hpp"
+#include "../fitting/ltc_fitting.hpp"
 #include "stb_image_write.h"
 
 static std::vector<unsigned char> discretize_color_vector(

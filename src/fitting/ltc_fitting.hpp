@@ -2,8 +2,8 @@
 
 #include <vector>
 #include "glm/glm.hpp"
-#include "brdf.hpp"
-#include "ltc.hpp"
+#include "../brdf/brdf.hpp"
+#include "../ltc/ltc.hpp"
 
 struct ltc_average_terms
 {

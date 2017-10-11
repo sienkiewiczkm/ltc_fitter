@@ -1,7 +1,7 @@
 #pragma once
 
 #include <array>
-#include "brdf.hpp"
+#include "../brdf/brdf.hpp"
 
 // Note that we are fitting 3 parameters, but saving 5, plus information
 // about original distribution norm and Fresnel term.

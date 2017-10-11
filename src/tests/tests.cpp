@@ -1,10 +1,10 @@
 #include "tests.hpp"
 #include <iostream>
-#include "ggx.hpp"
-#include "brdf_plot.hpp"
-#include "ltc_fitting.hpp"
-#include "log.hpp"
-#include "ltc.hpp"
+#include "../brdf/ggx.hpp"
+#include "../plotting/brdf_plot.hpp"
+#include "../fitting/ltc_fitting.hpp"
+#include "../utils/log.hpp"
+#include "../ltc/ltc.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"

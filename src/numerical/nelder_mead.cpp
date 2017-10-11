@@ -1,5 +1,5 @@
 #include "nelder_mead.hpp"
-#include "../log.hpp"
+#include "../utils/log.hpp"
 #include "vector_utils.hpp"
 #include <iostream>
 

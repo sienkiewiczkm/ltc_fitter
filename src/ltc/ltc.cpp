@@ -1,5 +1,5 @@
 #include "ltc.hpp"
-#include "log.hpp"
+#include "../utils/log.hpp"
 #include "boost/math/constants/constants.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
