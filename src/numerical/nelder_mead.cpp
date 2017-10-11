@@ -1,5 +1,6 @@
 #include "nelder_mead.hpp"
-#include "log.hpp"
+#include "../log.hpp"
+#include "vector_utils.hpp"
 #include <iostream>
 
 const float nelder_mead::_reflection_coeff = 1.0f;
@@ -14,12 +15,13 @@ nelder_mead::nelder_mead(int space_dimmension):
 {
 }
 
-std::vector<float> nelder_mead::optimize(std::vector<float> start_parameters)
+std::vector<float> nelder_mead::optimize(std::vector<float> start_parameters, const error_estimator* estimator)
 {
+  _estimator = estimator;
+
   if (start_parameters.size() != _space_dimmension)
   {
-    log_error() << "[Nelder-Mead] Start parameters have invalid "
-      << "dimmension (is= " << start_parameters.size()
+    log_error() << "[Nelder-Mead] Start parameters have invalid dimmension (is= " << start_parameters.size()
       << "; required=" << _space_dimmension << ").";
 
     throw std::invalid_argument("Start parameters have invalid dim.");
@@ -58,13 +60,11 @@ std::vector<float> nelder_mead::optimize(std::vector<float> start_parameters)
   {
     // iteration limit reached
     x_opt = _simplex[_min_index];
-    log_warning() << "[Nelder-Mead] Iteration limit reached ("
-      << max_iterations << ")." << std::endl;
+    log_warning() << "[Nelder-Mead] Iteration limit reached (" << max_iterations << ")." << std::endl;
   }
   else
   {
-    log_info() << "[Nelder-Mead] Solution found after " << iteration + 1
-      << " iterations." << std::endl;
+    log_info() << "[Nelder-Mead] Solution found after " << iteration + 1 << " iterations." << std::endl;
   }
 
   return x_opt;
@@ -91,12 +91,12 @@ bool nelder_mead::run_iteration()
 
   auto center_of_mass = get_center_of_mass();
 
-  auto pr = add(center_of_mass, mul(
-    sub(center_of_mass, _simplex[_max_index]),
+  auto pr = vector_utils::add(center_of_mass, vector_utils::mul(
+    vector_utils::sub(center_of_mass, _simplex[_max_index]),
     _reflection_coeff
   ));
 
-  auto pr_value = estimate_error(pr);
+  auto pr_value = _estimator->estimate_error(pr);
 
   // this almost maximum error comparison comes from Wikipedia article
   // refer: 'One possible variation of the NM algorithm' section
@@ -107,12 +107,12 @@ bool nelder_mead::run_iteration()
   }
   else if (pr_value < _min_error)
   {
-    auto pe = add(center_of_mass, mul(
-      sub(pr, center_of_mass),
+    auto pe = vector_utils::add(center_of_mass, vector_utils::mul(
+      vector_utils::sub(pr, center_of_mass),
       _expansion_coeff
     ));
 
-    auto pe_value = estimate_error(pe);
+    auto pe_value = _estimator->estimate_error(pe);
 
     if (pe_value < pr_value) // expansion
     {
@@ -131,12 +131,12 @@ bool nelder_mead::run_iteration()
     }
     else
     {
-      auto pc = add(center_of_mass, mul(
-        sub(_simplex[_max_index], center_of_mass),
+      auto pc = vector_utils::add(center_of_mass, vector_utils::mul(
+        vector_utils::sub(_simplex[_max_index], center_of_mass),
         _contraction_coeff
       ));
 
-      auto pc_value = estimate_error(pc);
+      auto pc_value = _estimator->estimate_error(pc);
 
       if (pc_value >= _max_error)
       {
@@ -161,7 +161,7 @@ void nelder_mead::find_min_max_error()
 
   for (auto i = 0; i < _simplex.size(); ++i)
   {
-    float value = estimate_error(_simplex[i]);
+    float value = _estimator->estimate_error(_simplex[i]);
 
     if (_min_error > value)
     {
@@ -190,7 +190,7 @@ float nelder_mead::get_simplex_norm()
 
   for (auto i = 0; i < _simplex.size(); ++i)
   {
-    auto current_norm = sum(abs(sub(_simplex[_min_index], _simplex[i])));
+    auto current_norm = vector_utils::sum(vector_utils::abs(vector_utils::sub(_simplex[_min_index], _simplex[i])));
     max_norm = std::max(max_norm, current_norm);
   }
 
@@ -205,11 +205,11 @@ std::vector<float> nelder_mead::get_center_of_mass()
   {
     if (i != _max_index)
     {
-      center_of_mass = add(center_of_mass, _simplex[i]);
+      center_of_mass = vector_utils::add(center_of_mass, _simplex[i]);
     }
   }
 
-  center_of_mass = div(center_of_mass, static_cast<float>(_space_dimmension));
+  center_of_mass = vector_utils::div(center_of_mass, static_cast<float>(_space_dimmension));
 
   return center_of_mass;
 }
@@ -220,108 +220,11 @@ void nelder_mead::reduce_simplex(int around)
   {
     if (i != around)
     {
-      _simplex[i] = add(_simplex[around], mul(
-        sub(_simplex[i], _simplex[around]),
+      _simplex[i] = vector_utils::add(_simplex[around], vector_utils::mul(
+        vector_utils::sub(_simplex[i], _simplex[around]),
         _shrink_coeff
       ));
     }
   }
 }
 
-std::vector<float> nelder_mead::add(
-  std::vector<float> a,
-  std::vector<float> b
-) const
-{
-  if (a.size() != b.size())
-  {
-    log_error() << "[Nelder-Mead] Add operands dimmensions do not match. "
-      << "dim(a)=" << a.size() << "; dim(b)=" << b.size();
-    throw std::invalid_argument("Operands dimmensions do not match");
-  }
-
-  std::vector<float> output(a.size());
-
-  for (auto i = 0; i < a.size(); ++i)
-  {
-    output[i] = a[i] + b[i];
-  }
-
-  return output;
-}
-
-std::vector<float> nelder_mead::sub(
-  std::vector<float> a,
-  std::vector<float> b
-) const
-{
-  if (a.size() != b.size())
-  {
-    log_error() << "[Nelder-Mead] Sub operands dimmensions do not match. "
-      << "dim(a)=" << a.size() << "; dim(b)=" << b.size();
-    throw std::invalid_argument("Operands dimmensions do not match");
-  }
-
-  std::vector<float> output(a.size());
-
-  for (auto i = 0; i < a.size(); ++i)
-  {
-    output[i] = a[i] - b[i];
-  }
-
-  return output;
-}
-
-std::vector<float> nelder_mead::mul(
-  std::vector<float> a,
-  float multipler
-) const
-{
-  std::vector<float> output(a.size());
-
-  for (auto i = 0; i < a.size(); ++i)
-  {
-    output[i] = a[i] * multipler;
-  }
-
-  return output;
-}
-
-std::vector<float> nelder_mead::div(
-  std::vector<float> a,
-  float divisor
-) const
-{
-  std::vector<float> output(a.size());
-
-  for (auto i = 0; i < a.size(); ++i)
-  {
-    output[i] = a[i] / divisor;
-  }
-
-  return output;
-}
-
-float nelder_mead::sum(std::vector<float> a) const
-{
-  float accumulator = 0.0f;
-
-  for (auto i = 0; i < a.size(); ++i)
-  {
-    accumulator += a[i];
-  }
-
-  return accumulator;
-}
-
-std::vector<float> nelder_mead::abs(std::vector<float> input)
-{
-  std::vector<float> output(input.size());
-
-  for (auto i = 0; i < input.size(); ++i)
-  {
-    output[i] = std::abs(input[i]);
-  }
-
-  return output;
-}

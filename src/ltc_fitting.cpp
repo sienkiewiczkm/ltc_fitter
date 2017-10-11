@@ -3,11 +3,14 @@
 #include "ltc_fitting.hpp"
 #include "boost/math/constants/constants.hpp"
 #include "ggx.hpp"
-#include "ltc_nelder_mead.hpp"
+#include "ltc/ltc_error_estimator.hpp"
 #include "ltc.hpp"
 #include "glm/gtx/string_cast.hpp"
 
 #include "log.hpp"
+#include "numerical/nelder_mead.hpp"
+#include "numerical/penalty_optimizer.hpp"
+#include "numerical/logarithmic_penalty_error_estimator.hpp"
 
 ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm::vec3 &first_guess)
 {
@@ -32,12 +35,19 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
   glm::vec3 frame_z = average_terms.average_direction;
   glm::mat3 frame{frame_x, frame_y, frame_z};
 
-  ltc_nelder_mead optimizer{brdf};
-  optimizer.set_amplitude(average_terms.distribution_norm);
-  optimizer.set_view_dir(view_dir);
-  optimizer.set_base_frame(frame);
-  optimizer.set_isotropy_forcing(force_isotropic);
-  auto result = optimizer.optimize(first_guess);
+  auto error_estimator = std::make_shared<ltc_error_estimator>(brdf);
+  error_estimator->set_amplitude(average_terms.distribution_norm);
+  error_estimator->set_view_dir(view_dir);
+  error_estimator->set_base_frame(frame);
+  error_estimator->set_isotropy_forcing(force_isotropic);
+
+  auto penalty_estimator = std::make_shared<logarithmic_penalty_error_estimator>();
+  penalty_estimator->set_base_estimator(error_estimator);
+
+  penalty_optimizer optimizer;
+  optimizer.set_penalty_estimator(penalty_estimator);
+  auto result_vector = optimizer.optimize({first_guess.x, first_guess.y, first_guess.z});
+  glm::vec3 result{result_vector[0], result_vector[1], result_vector[2]};
 
   if (force_isotropic)
   {
@@ -47,9 +57,6 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
 
   // magic frame test
   //result = {0.3f, 0.3f, 0.0f};
-
-  // TODO: Replace with penalty function
-  result = glm::max(result, {0.05f, 0.05f, 0.0f});
 
   ltc ltc;
   ltc.set_amplitude(average_terms.distribution_norm);

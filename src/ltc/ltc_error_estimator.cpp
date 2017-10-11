@@ -1,22 +1,22 @@
-#include "ltc_nelder_mead.hpp"
-#include "ltc.hpp"
+#include "ltc_error_estimator.hpp"
+#include "../ltc.hpp"
 #include <iostream>
 
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "glm/gtx/string_cast.hpp"
-#include "log.hpp"
+#include "../log.hpp"
 
-ltc_nelder_mead::ltc_nelder_mead(
+ltc_error_estimator::ltc_error_estimator(
   const brdf &brdf
 ):
-  nelder_mead(3),
   _brdf{brdf},
   _amplitude{1.0f}
 {
 }
 
-glm::vec3 ltc_nelder_mead::optimize(glm::vec3 start_parameters)
+/*
+glm::vec3 ltc_error_estimator::optimize(glm::vec3 start_parameters)
 {
   std::vector<float> input{start_parameters.x, start_parameters.y, start_parameters.z};
 
@@ -29,14 +29,15 @@ glm::vec3 ltc_nelder_mead::optimize(glm::vec3 start_parameters)
 
   return {result[0], result[1], result[2]};
 }
+*/
 
-float ltc_nelder_mead::estimate_error(std::vector<float> parameters)
+float ltc_error_estimator::estimate_error(const std::vector<float>& parameters) const
 {
   glm::vec3 params{parameters[0], parameters[1], parameters[2]};
   return estimate_error(params);
 }
 
-float ltc_nelder_mead::estimate_error(glm::vec3 parameters)
+float ltc_error_estimator::estimate_error(glm::vec3 parameters) const
 {
   const int num_samples = 32;
 
@@ -71,11 +72,11 @@ float ltc_nelder_mead::estimate_error(glm::vec3 parameters)
   return final_error;
 }
 
-double ltc_nelder_mead::estimate_partial_error(
+double ltc_error_estimator::estimate_partial_error(
   const brdf &sample_source,
   const brdf &other_brdf,
   const glm::vec2 &random_parameters
-)
+) const
 {
   const glm::vec3 light_dir = sample_source.sample({}, random_parameters);
 

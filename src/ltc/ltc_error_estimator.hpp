@@ -2,19 +2,17 @@
 
 #include <vector>
 #include "glm/glm.hpp"
-#include "nelder_mead.hpp"
-#include "brdf.hpp"
+#include "../numerical/error_estimator.hpp"
+#include "../brdf.hpp"
 
-class ltc_nelder_mead: public nelder_mead
+class ltc_error_estimator: public error_estimator
 {
 public:
-  ltc_nelder_mead(const brdf &brdf);
+  explicit ltc_error_estimator(const brdf &brdf);
+  ~ltc_error_estimator() override = default;
 
-  virtual ~ltc_nelder_mead()
-  {
-  }
-
-  glm::vec4 optimize(glm::vec4 start_parameters);
+  float estimate_error(const std::vector<float>& parameters) const override;
+  float estimate_error(glm::vec3 parameters) const;
 
   void set_amplitude(float amplitude)
   {
@@ -36,17 +34,12 @@ public:
     _force_isotropy = force_isotropy;
   }
 
-  glm::vec3 optimize(glm::vec3 start_parameters);
-
 protected:
-  virtual float estimate_error(std::vector<float> parameters);
-  float estimate_error(glm::vec3 parameters);
-
   double estimate_partial_error(
     const brdf &sample_source,
     const brdf &other_brdf,
     const glm::vec2 &random_parameters
-  );
+  ) const;
 
 private:
   const brdf &_brdf;
