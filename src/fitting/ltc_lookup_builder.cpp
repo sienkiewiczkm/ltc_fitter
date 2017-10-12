@@ -15,6 +15,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "glm/gtx/string_cast.hpp"
+#include "../brdf/ggx_slope.hpp"
 
 fitting_result build_lookup(const fitting_settings &settings)
 {
@@ -22,7 +23,8 @@ fitting_result build_lookup(const fitting_settings &settings)
 
   if (settings.brdf_method == "ggx")
   {
-    brdf = new ggx;
+    // TODO: use real ggx
+    brdf = new ggx_slope;
   }
   else
   {

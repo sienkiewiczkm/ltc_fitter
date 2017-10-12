@@ -50,7 +50,7 @@ add_executable(${PROJECT_NAME}
   src/utils/log.cpp
   src/utils/log.hpp
   src/utils/stb_implementation.c
-)
+  src/brdf/ggx_slope.cpp src/brdf/ggx_slope.hpp)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
