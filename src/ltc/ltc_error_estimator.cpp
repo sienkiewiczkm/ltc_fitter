@@ -63,7 +63,7 @@ double ltc_error_estimator::estimate_partial_error(
   const glm::vec2 &random_parameters
 ) const
 {
-  const glm::vec3 light_dir = sample_source.sample({}, random_parameters);
+  const glm::vec3 light_dir = sample_source.sample(_view_dir, random_parameters);
 
   float source_pdf, other_pdf;
 

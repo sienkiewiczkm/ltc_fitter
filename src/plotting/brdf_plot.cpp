@@ -172,7 +172,7 @@ float brdf_plot::estimate_maximum_value(int samples_sqrt)
       };
 
       float pdf;
-      auto test_vector = _brdf->sample({}, sample);
+      auto test_vector = _brdf->sample(_view_dir, sample);
       auto test_value = _brdf->evaluate(test_vector, _view_dir, pdf);
       max_value = std::max(max_value, test_value);
     }
