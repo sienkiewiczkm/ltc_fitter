@@ -82,22 +82,13 @@ ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &vie
       float probability_density_function;
 
       float value = brdf.evaluate(light_dir, view_dir, probability_density_function);
-      float weight = value / probability_density_function;
-
-      // PDF should be always positive!
-      // This workaround should be (hopefully) redundant once all bugs
-      // will be found and fixed.
-      // TODO: Remove when time comes.
-      if (probability_density_function < 0.0f)
-      {
-        weight = 0.0f;
-      }
+      float weight = probability_density_function > 0.0f ? value / probability_density_function : 0.0f;
 
       average_terms.distribution_norm += weight;
+
       if (std::isnan(average_terms.distribution_norm))
       {
-        // reevaluate for debug purposes
-        log_error() << "distribution norm is NaN!" << std::endl;
+        log_error() << "Distribution norm is NaN!" << std::endl;
         value = brdf.evaluate(light_dir, view_dir, probability_density_function);
       }
 
@@ -116,13 +107,12 @@ ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &vie
     }
   }
 
+  average_terms.distribution_norm /= static_cast<float>(num_samples * num_samples);
+  average_terms.fresnel_term /= static_cast<float>(num_samples * num_samples );
+
   // Limit average direction to XZ plane
   average_terms.average_direction.y = 0.0f;
   average_terms.average_direction = glm::normalize(average_terms.average_direction);
-
-  average_terms.distribution_norm /= static_cast<float>(num_samples * num_samples);
-
-  average_terms.fresnel_term /= static_cast<float>(num_samples * num_samples );
 
   return average_terms;
 }
