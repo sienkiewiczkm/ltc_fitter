@@ -40,13 +40,11 @@ fitting_result build_lookup(const fitting_settings &settings)
   for (auto rough_frag = 0; rough_frag < settings.resolution; ++rough_frag)
   {
     const auto rough_perc = rough_frag / static_cast<float>(settings.resolution - 1);
-    const auto roughness = glm::mix(
-      settings.min_roughness,
-      settings.max_roughness,
-      rough_perc
-    );
 
-    const float MIN_ALPHA = 0.01f;
+    // TODO: Restore support for roughness boundaries
+    const auto roughness = rough_perc;
+
+    const float MIN_ALPHA = 0.0001f;
     auto alpha = roughness * roughness;
     brdf->set_alpha(std::max(MIN_ALPHA, alpha));
 
