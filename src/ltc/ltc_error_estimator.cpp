@@ -1,11 +1,6 @@
 #include "ltc_error_estimator.hpp"
 #include "ltc.hpp"
-#include <iostream>
-
-#define GLM_ENABLE_EXPERIMENTAL
-
-#include "glm/gtx/string_cast.hpp"
-#include "../utils/log.hpp"
+#include "../utils/hacks.hpp"
 
 ltc_error_estimator::ltc_error_estimator(
   const brdf &brdf
@@ -31,10 +26,9 @@ float ltc_error_estimator::estimate_error(glm::vec3 parameters) const
     parameters.z = 0.0f;
   }
 
-  if (parameters.x < 0.05f) parameters.x = 0.05f;
-  if (parameters.y < 0.05f) parameters.y = 0.05f;
+  //parameters = hacks::fix_parameters_below_zero(parameters);
 
-  float total_error = 0.0f;
+  double total_error = 0.0f;
 
   ltc ltc;
   ltc.set_amplitude(_amplitude);
@@ -53,7 +47,7 @@ float ltc_error_estimator::estimate_error(glm::vec3 parameters) const
     }
   }
 
-  auto final_error = total_error / static_cast<double>(num_samples * num_samples);
+  float final_error = static_cast<float>(total_error) / static_cast<float>(num_samples * num_samples);
   return final_error;
 }
 

@@ -44,11 +44,11 @@ fitting_result build_lookup(const fitting_settings &settings)
     // TODO: Restore support for roughness boundaries
     const auto roughness = rough_perc;
 
-    const float MIN_ALPHA = 0.0001f;
+    const float MIN_ALPHA = 0.001f;
     auto alpha = roughness * roughness;
     brdf->set_alpha(std::max(MIN_ALPHA, alpha));
 
-    glm::vec3 last_result{0.4f, 0.4f, 0.0f};
+    glm::vec3 last_result{1.0f, 1.0f, 0.0f};
 
     for (auto angle_frag = 0; angle_frag < settings.resolution; ++angle_frag)
     {
@@ -69,7 +69,10 @@ fitting_result build_lookup(const fitting_settings &settings)
         << std::setw(5) << theta << " " << std::setw(9) << roughness << std::endl;
 
       ltc_store_data data;
+
+      // Use the last result, but throw skewness factor away
       glm::vec3 first_guess = last_result;
+      first_guess.z = 0.0f;
 
       try
       {

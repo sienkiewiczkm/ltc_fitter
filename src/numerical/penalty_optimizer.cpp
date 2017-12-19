@@ -12,7 +12,7 @@ std::vector<float> penalty_optimizer::optimize(const std::vector<float>& start_p
   nelder_mead mead_optimizer(start_parameters.size());
 
   auto current_parameters = start_parameters;
-  const float acceptable_step_norm = 0.01f;
+  const float acceptable_step_norm = 1e-4f;
 
   const int max_iterations = 10;
   int iteration = 0;
@@ -36,7 +36,7 @@ std::vector<float> penalty_optimizer::optimize(const std::vector<float>& start_p
 
   if (iteration >= max_iterations)
   {
-    log_info() << "Maximum number of iterations reached." << std::endl;
+    log_info() << "[Penalty optimizer] Maximum number of iterations reached (" << max_iterations << ")." << std::endl;
   }
 
   return current_parameters;

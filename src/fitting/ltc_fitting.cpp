@@ -8,6 +8,7 @@
 #include "glm/gtx/string_cast.hpp"
 
 #include "../utils/log.hpp"
+#include "../utils/hacks.hpp"
 #include "../numerical/nelder_mead.hpp"
 #include "../numerical/penalty_optimizer.hpp"
 #include "../numerical/logarithmic_penalty_error_estimator.hpp"
@@ -50,12 +51,15 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
   glm::vec3 result{result_vector[0], result_vector[1], result_vector[2]};
 
   log_info() << "result: " << glm::to_string(result) << std::endl;
+  result = hacks::fix_parameters_below_zero(result);
 
   if (force_isotropic)
   {
     result.y = result.x;
     result.z = 0.0f;
   }
+
+  log_info() << "adjusted result: " << glm::to_string(result) << std::endl;
 
   ltc ltc;
   ltc.set_amplitude(average_terms.distribution_norm);

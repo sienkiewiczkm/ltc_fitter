@@ -36,13 +36,13 @@ std::vector<float> nelder_mead::optimize(std::vector<float> start_parameters, co
     i = start_parameters;
   }
 
-  float delta = 0.2f;
+  float delta = 0.1f;
   for (auto i = 1; i <= _space_dimmension; ++i)
   {
     _simplex[i][i - 1] += delta;
   }
 
-  _iteration_epsilon = 0.0001f;
+  _iteration_epsilon = 1e-5f;
 
   auto iteration = 0;
   auto max_iterations = 300;
@@ -74,17 +74,19 @@ bool nelder_mead::run_iteration()
 {
   find_min_max_error();
 
+  /*
   if (get_simplex_norm() < _iteration_epsilon)
   {
     return false;
   }
+ */
 
   // stop if difference between maximum and minimum value is very low
   // read the source: Numerical Recipes in C++ (3rd Ed.)
   float a = fabsf(_min_error);
   float b = fabsf(_max_error);
 
-  if (2.0f * fabsf(a - b) < (a + b) * (1e-5f))
+  if (2.0f * fabsf(a - b) < (a + b) * _iteration_epsilon)
   {
     return false;
   }

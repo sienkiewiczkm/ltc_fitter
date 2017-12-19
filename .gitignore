@@ -5,6 +5,7 @@
 
 build/
 cmake-build-debug/
+results/
 xcode/
 
 .DS_Store

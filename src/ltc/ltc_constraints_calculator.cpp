@@ -5,6 +5,7 @@
 std::vector<float> ltc_constraints_calculator::calculate_constraints(const std::vector<float> &parameters)
 {
   auto constraints = std::vector<float>(2);
+  // constraints g(x) <= 0
 
   if (parameters.size() != 3)
   {
@@ -18,6 +19,7 @@ std::vector<float> ltc_constraints_calculator::calculate_constraints(const std::
 
   for (auto i = 0; i < 2; ++i)
   {
+    // x >= 1e-6   ==>   1e-6 - x <= 0
     constraints[i] = parameter_min_value - parameters[i];
   }
 

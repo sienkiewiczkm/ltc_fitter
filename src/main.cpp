@@ -20,7 +20,7 @@
 
 int main(int argc, const char *argv[])
 {
-  test_all();
+  //test_all();
 
   try
   {
