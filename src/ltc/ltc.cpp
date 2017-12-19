@@ -40,10 +40,10 @@ float ltc::evaluate(
   }
 
   const auto pi = boost::math::constants::pi<float>();
-  float d = 1.0f / pi * std::max(0.0f, original_light_dir.z);
-  float result = _amplitude * d / jacobian;
+  float d = std::max(0.0f, original_light_dir.z) / pi / jacobian;
+  float result = _amplitude * d;
 
-  probability_density_function = result / _amplitude;
+  probability_density_function = d;
 
   return result;
 }
@@ -51,13 +51,13 @@ float ltc::evaluate(
 glm::vec3 ltc::sample(const glm::vec3 &view_dir, const glm::vec2 &random_parameters) const
 {
   const auto pi = boost::math::constants::pi<float>();
-  const float theta = std::acosf(std::sqrtf(random_parameters.x));
-  const float phi = 2.0f * pi * random_parameters.y;
+  const float phi = std::acosf(std::sqrtf(random_parameters.x));
+  const float theta = 2.0f * pi * random_parameters.y;
 
   const glm::vec3 original_sample{
-    std::sinf(theta) * std::cosf(phi),
-    std::sinf(theta) * std::sinf(phi),
-    std::cosf(theta)
+    std::sinf(phi) * std::cosf(theta),
+    std::sinf(phi) * std::sinf(theta),
+    std::cosf(phi)
   };
 
   return glm::normalize(get_framed_ltc_matrix() * original_sample);
