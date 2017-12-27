@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.8)
 project(ltc_fitter)
 
-find_package(Boost 1.63.0 REQUIRED COMPONENTS program_options date_time)
+find_package(Boost 1.63 REQUIRED COMPONENTS program_options date_time)
 
 include_directories(${Boost_INCLUDE_DIRS})
 include_directories(${PROJECT_SOURCE_DIR}/dependencies/glm)
