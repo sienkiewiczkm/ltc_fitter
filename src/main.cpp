@@ -2,12 +2,6 @@
 #include <iostream>
 #include "fitting_settings.hpp"
 #include "fitting/ltc_lookup_builder.hpp"
-#include "brdf/ggx.hpp"
-#include "ltc/ltc.hpp"
-#include "exporters/hdr_exporter.hpp"
-
-#include "fitting/ltc_fitting.hpp"
-#include "plotting/brdf_plot.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -16,26 +10,25 @@
 #include <boost/math/constants/constants.hpp>
 #include "utils/log.hpp"
 
-#include "tests/tests.hpp"
+#include "files/arealights_ltc_file/arealights_ltc_file.hpp"
+#include "exporters/alf_exporter.hpp"
 
 int main(int argc, const char *argv[])
 {
-  //test_all();
-
   try
   {
     fitting_settings settings;
     if (!get_fitting_settings_from_command_line(settings, argc, argv))
     {
-      log_error() << "failed to set fitting settings, aborting"
-        << std::endl;
+      log_error() << "failed to set fitting settings, aborting" << std::endl;
       return EXIT_FAILURE;
     }
 
     print_fitting_settings(settings);
     auto result = build_lookup(settings);
 
-    export_to_hdr(settings.output_file, result);
+    auto file = make_alf_file(result);
+    alf::write_alf_file(*file, settings.output_file);
   }
   catch (std::exception &exc)
   {
@@ -44,9 +37,7 @@ int main(int argc, const char *argv[])
   }
   catch (...)
   {
-    log_error() << "Unknown exception has been thrown. Aborting."
-      << std::endl;
-
+    log_error() << "Unknown exception has been thrown. Aborting." << std::endl;
     return EXIT_FAILURE;
   }
 

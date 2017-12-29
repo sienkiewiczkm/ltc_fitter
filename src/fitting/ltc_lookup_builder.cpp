@@ -36,6 +36,7 @@ fitting_result build_lookup(const fitting_settings &settings)
 
   fitting_result result;
   result.settings = settings;
+  result.transformations.resize(settings.resolution * settings.resolution);
 
   for (auto rough_frag = 0; rough_frag < settings.resolution; ++rough_frag)
   {
@@ -44,9 +45,9 @@ fitting_result build_lookup(const fitting_settings &settings)
     // TODO: Restore support for roughness boundaries
     const auto roughness = rough_perc;
 
-    const float MIN_ALPHA = 0.001f;
-    auto alpha = roughness * roughness;
-    brdf->set_alpha(std::max(MIN_ALPHA, alpha));
+    const float MIN_ALPHA = 0.01f;
+    auto alpha = std::max(roughness * roughness, MIN_ALPHA);
+    brdf->set_alpha(alpha);
 
     glm::vec3 last_result{1.0f, 1.0f, 0.0f};
 
@@ -94,7 +95,8 @@ fitting_result build_lookup(const fitting_settings &settings)
       plotter.export_png(brdf, ss.str() + "brdf.png");
       plotter.export_png(&ltc, ss.str() + "ltc.png");
 
-      //result.transformations.push_back(parameters);
+      int store_index = rough_frag + settings.resolution * angle_frag;
+      result.transformations[store_index] = data;
     }
   }
 

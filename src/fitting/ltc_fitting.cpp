@@ -2,14 +2,11 @@
 
 #include "ltc_fitting.hpp"
 #include "boost/math/constants/constants.hpp"
-#include "../brdf/ggx.hpp"
 #include "../ltc/ltc_error_estimator.hpp"
-#include "../ltc/ltc.hpp"
 #include "glm/gtx/string_cast.hpp"
 
 #include "../utils/log.hpp"
 #include "../utils/hacks.hpp"
-#include "../numerical/nelder_mead.hpp"
 #include "../numerical/penalty_optimizer.hpp"
 #include "../numerical/logarithmic_penalty_error_estimator.hpp"
 

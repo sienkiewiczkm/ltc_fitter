@@ -11,8 +11,11 @@ add_executable(${PROJECT_NAME}
   src/brdf/brdf.hpp
   src/brdf/ggx.cpp
   src/brdf/ggx.hpp
-  src/exporters/hdr_exporter.cpp
-  src/exporters/hdr_exporter.hpp
+  src/brdf/ggx_slope.cpp
+  src/brdf/ggx_slope.hpp
+  src/exporters/alf_exporter.cpp src/exporters/alf_exporter.hpp
+  src/files/arealights_ltc_file/arealights_ltc_file.cpp
+  src/files/arealights_ltc_file/arealights_ltc_file.hpp
   src/fitting/ltc_fitting.cpp
   src/fitting/ltc_fitting.hpp
   src/fitting/ltc_lookup_builder.cpp
@@ -41,16 +44,16 @@ add_executable(${PROJECT_NAME}
   src/plotting/brdf_plot.hpp
   src/plotting/raycasting.cpp
   src/plotting/raycasting.hpp
-  src/plotting/result_saving.cpp
-  src/plotting/result_saving.hpp
   src/tests/tests.cpp
   src/tests/tests.hpp
+  src/utils/hacks.cpp
+  src/utils/hacks.hpp
   src/utils/helpers.cpp
   src/utils/helpers.hpp
   src/utils/log.cpp
   src/utils/log.hpp
   src/utils/stb_implementation.c
-  src/brdf/ggx_slope.cpp src/brdf/ggx_slope.hpp src/utils/hacks.cpp src/utils/hacks.hpp)
+  src/tests/export_original_fit.hpp src/tests/export_original_fit.cpp)
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)
