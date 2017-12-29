@@ -6,8 +6,8 @@ std::unique_ptr<alf::alf_file> make_alf_file(const fitting_result &data)
   auto file = std::make_unique<alf::alf_file>();
 
   std::strcpy(file->header.id, "ALF");
-  file->header.num_samples_angle = data.settings.resolution;
-  file->header.num_samples_roughness = data.settings.resolution;
+  file->header.num_samples_angle = data.num_samples_angle;
+  file->header.num_samples_roughness = data.num_samples_roughness;
   file->header.version_major = 1;
   file->header.version_minor = 0;
 
@@ -23,7 +23,7 @@ std::unique_ptr<alf::alf_file> make_alf_file(const fitting_result &data)
       auto base_tex1 = 4 * matrix_index;
       auto base_tex2 = 3 * matrix_index;
 
-      const auto& params = data.transformations[matrix_index];
+      const auto& params = data.getData(theta, alpha);
 
       file->texture_slot1[base_tex1+0] = params.matrix_parameters[0];
       file->texture_slot1[base_tex1+1] = params.matrix_parameters[1];

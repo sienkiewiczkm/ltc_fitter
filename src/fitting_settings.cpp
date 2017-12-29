@@ -15,6 +15,7 @@ bool get_fitting_settings_from_command_line(
   po::options_description description("Allowed options");
   description.add_options()
     ("help", "help message")
+    ("test", "run test suite")
     (
       "resolution,r",
       po::value<int>(&output.resolution)->default_value(64),
@@ -66,7 +67,15 @@ bool get_fitting_settings_from_command_line(
       << "Based on work of Heitz et al: \"Linearly Transformed Cosines\""
       << std::endl;
     std::cout << description << std::endl;
-    return false;
+
+    output.run_mode = run_mode::exit;
+    return true;
+  }
+
+  if (var_map.count("test"))
+  {
+    output.run_mode = run_mode::test;
+    return true;
   }
 
   if (!var_map.count("output"))

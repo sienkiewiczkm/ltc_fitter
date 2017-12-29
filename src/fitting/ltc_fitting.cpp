@@ -1,5 +1,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
+#include <exception>
+
 #include "ltc_fitting.hpp"
 #include "boost/math/constants/constants.hpp"
 #include "../ltc/ltc_error_estimator.hpp"
@@ -47,7 +49,8 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
   auto result_vector = optimizer.optimize({first_guess.x, first_guess.y, first_guess.z});
   glm::vec3 result{result_vector[0], result_vector[1], result_vector[2]};
 
-  log_info() << "result: " << glm::to_string(result) << std::endl;
+  log_debug() << "Result: " << glm::to_string(result) << std::endl;
+
   result = hacks::fix_parameters_below_zero(result);
 
   if (force_isotropic)
@@ -56,7 +59,7 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
     result.z = 0.0f;
   }
 
-  log_info() << "adjusted result: " << glm::to_string(result) << std::endl;
+  log_debug() << "Adjusted result: " << glm::to_string(result) << std::endl;
 
   ltc ltc;
   ltc.set_amplitude(average_terms.distribution_norm);
@@ -89,8 +92,8 @@ ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &vie
 
       if (std::isnan(average_terms.distribution_norm))
       {
-        log_error() << "Distribution norm is NaN!" << std::endl;
-        value = brdf.evaluate(light_dir, view_dir, probability_density_function);
+        log_error() << "Distribution norm is NaN." << std::endl;
+        throw std::logic_error("Distribution norm is NaN.");
       }
 
       // You can find explanation of this calculation there:

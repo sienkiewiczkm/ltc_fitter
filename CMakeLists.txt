@@ -16,6 +16,8 @@ add_executable(${PROJECT_NAME}
   src/exporters/alf_exporter.cpp src/exporters/alf_exporter.hpp
   src/files/arealights_ltc_file/arealights_ltc_file.cpp
   src/files/arealights_ltc_file/arealights_ltc_file.hpp
+  src/fitting/fitting_result.cpp
+  src/fitting/fitting_result.hpp
   src/fitting/ltc_fitting.cpp
   src/fitting/ltc_fitting.hpp
   src/fitting/ltc_lookup_builder.cpp
@@ -44,6 +46,9 @@ add_executable(${PROJECT_NAME}
   src/plotting/brdf_plot.hpp
   src/plotting/raycasting.cpp
   src/plotting/raycasting.hpp
+  src/tests/export_original_fit.cpp
+  src/tests/export_original_fit.hpp
+  src/tests/original_heitz_fit.hpp
   src/tests/tests.cpp
   src/tests/tests.hpp
   src/utils/hacks.cpp
@@ -53,7 +58,7 @@ add_executable(${PROJECT_NAME}
   src/utils/log.cpp
   src/utils/log.hpp
   src/utils/stb_implementation.c
-  src/tests/export_original_fit.hpp src/tests/export_original_fit.cpp)
+  )
 
 target_link_libraries(${PROJECT_NAME} PUBLIC ${Boost_LIBRARIES})
 target_compile_features(${PROJECT_NAME} PUBLIC cxx_std_14)

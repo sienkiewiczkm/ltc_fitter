@@ -2,12 +2,20 @@
 
 #include <string>
 
+enum class run_mode {
+  normal,
+  test,
+  exit
+};
+
 struct fitting_settings
 {
-  fitting_settings()
+  fitting_settings():
+    run_mode{run_mode::normal}
   {
   }
 
+  run_mode run_mode;
   int resolution;
   float min_roughness;
   float max_roughness;

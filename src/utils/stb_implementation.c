@@ -1,3 +1,6 @@
+// STB is distributed as header-only library with requirement of specifying exactly *one* file with _IMPLEMENTATION
+// macros defined. This file serves that purpose.
+
 #define STB_DEFINE
 #define STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_WRITE_IMPLEMENTATION

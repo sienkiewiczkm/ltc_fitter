@@ -7,7 +7,9 @@
 void export_alf_original_fit(const std::string &filename)
 {
   fitting_result result;
-  result.settings.resolution = original_heitz_fit::size;
+
+  result.num_samples_angle = original_heitz_fit::size;
+  result.num_samples_roughness = original_heitz_fit::size;
 
   for (auto theta = 0; theta < original_heitz_fit::size; ++theta)
   {

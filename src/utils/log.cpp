@@ -3,47 +3,49 @@
 #include <iostream>
 #include <sstream>
 
+log_level g_log_level = log_level_info;
+std::stringstream g_sink_stringstream;
+
 std::ostream &log_debug()
 {
-  return std::cout << get_time_str() << "  DBG ";
+  if (g_log_level >= log_level_debug)
+  {
+    return std::cout << get_time_str() << "  DBG ";
+  }
+
+  g_sink_stringstream.clear();
+  return g_sink_stringstream;
 }
 
 std::ostream &log_info()
 {
-  return std::cout << get_time_str() << " INFO ";
+  if (g_log_level >= log_level_info)
+  {
+    return std::cout << get_time_str() << " INFO ";
+  }
+
+  g_sink_stringstream.clear();
+  return g_sink_stringstream;
 }
 
 std::ostream &log_warning()
 {
-  return std::cout << get_time_str() << " WARN ";
+  if (g_log_level >= log_level_warning)
+  {
+    return std::cout << get_time_str() << " WARN ";
+  }
+
+  g_sink_stringstream.clear();
+  return g_sink_stringstream;
 }
 
 std::ostream &log_error()
 {
-  return std::cerr << get_time_str() << "  ERR ";
-}
+  if (g_log_level >= log_level_error)
+  {
+    return std::cerr << get_time_str() << "  ERR ";
+  }
 
-std::string format_exact_vector(const glm::vec3 &vec)
-{
-  std::stringstream ss;
-
-  ss << "glm::vec3(";
-  ss << std::hexfloat << vec.x << ", ";
-  ss << std::hexfloat << vec.y << ", ";
-  ss << std::hexfloat << vec.z << ")";
-
-  return ss.str();
-}
-
-std::string format_exact_vector(const glm::vec4 &vec)
-{
-  std::stringstream ss;
-
-  ss << "glm::vec4(";
-  ss << std::hexfloat << vec.x << ", ";
-  ss << std::hexfloat << vec.y << ", ";
-  ss << std::hexfloat << vec.z << ", ";
-  ss << std::hexfloat << vec.w << ")";
-
-  return ss.str();
+  g_sink_stringstream.clear();
+  return g_sink_stringstream;
 }

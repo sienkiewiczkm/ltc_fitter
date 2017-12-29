@@ -16,6 +16,7 @@
 
 #include "glm/gtx/string_cast.hpp"
 #include "../brdf/ggx_slope.hpp"
+#include "fitting_result.hpp"
 
 fitting_result build_lookup(const fitting_settings &settings)
 {
@@ -23,20 +24,18 @@ fitting_result build_lookup(const fitting_settings &settings)
 
   if (settings.brdf_method == "ggx")
   {
-    // TODO: use real ggx
     brdf = new ggx_slope;
   }
   else
   {
-    throw std::invalid_argument("Provided BRDF method is unsupported.");
+    throw std::invalid_argument("Requested BRDF method is not supported.");
   }
 
   log_info() << "Fitting process started." << std::endl;
   log_info() << "  % Angle Roughness Parameters" << std::endl;
 
   fitting_result result;
-  result.settings = settings;
-  result.transformations.resize(settings.resolution * settings.resolution);
+  result.resize(settings.resolution, settings.resolution);
 
   for (auto rough_frag = 0; rough_frag < settings.resolution; ++rough_frag)
   {
@@ -58,6 +57,13 @@ fitting_result build_lookup(const fitting_settings &settings)
       // the circle. Y = sqrt(R^2 - X^2) and calculating cosine there.
       // Also, limit the angle to 1.57 which is a bit below PI/2,
       // we do not want to calculate for orthogonal case.
+      //
+      //  |        /
+      //  |theta /
+      //  |    /  ||V||=1
+      //  |  /
+      //  |/
+      //
       const auto angle_perc = angle_frag / static_cast<float>(settings.resolution - 1);
       float cos_theta = 1.0f - angle_perc * angle_perc;
       float theta = std::min(1.57f, std::acosf(cos_theta));
@@ -83,20 +89,23 @@ fitting_result build_lookup(const fitting_settings &settings)
       {
       }
 
-      std::stringstream ss;
-      ss << "fit_r" << rough_frag << "_a" << angle_frag << "_";
+      // TODO: Add option for image previews generation on the way.
+      {
+        ltc ltc;
+        ltc.set_store_data(data);
 
-      ltc ltc;
-      ltc.set_store_data(data);
+        brdf_plot plotter;
+        plotter.set_view_dir(view_dir);
+        plotter.set_resolution(256);
 
-      brdf_plot plotter;
-      plotter.set_view_dir(view_dir);
-      plotter.set_resolution(256);
-      plotter.export_png(brdf, ss.str() + "brdf.png");
-      plotter.export_png(&ltc, ss.str() + "ltc.png");
+        std::stringstream ss;
+        ss << "fit_r" << rough_frag << "_a" << angle_frag << "_";
 
-      int store_index = rough_frag + settings.resolution * angle_frag;
-      result.transformations[store_index] = data;
+        plotter.export_png(brdf, ss.str() + "brdf.png");
+        plotter.export_png(&ltc, ss.str() + "ltc.png");
+      }
+
+      result.setData(angle_frag, rough_frag, data);
     }
   }
 

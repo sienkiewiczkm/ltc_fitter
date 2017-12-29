@@ -118,10 +118,6 @@ void test_simple_ggx_fit()
     log_info() << "VISUAL TEST: test_simple_ggx_fit completed." << std::endl;
 }
 
-void test_high_angle_fit_path()
-{
-}
-
 void test_all()
 {
     test_export_simple_ltc();
@@ -129,7 +125,6 @@ void test_all()
     test_untransformed_ltc_amplitude();
     test_ggx_amplitude();
     test_simple_ggx_fit();
-    test_high_angle_fit_path();
 }
 
 
