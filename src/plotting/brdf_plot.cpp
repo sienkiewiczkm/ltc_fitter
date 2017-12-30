@@ -2,6 +2,7 @@
 #include "stb_image_write.h"
 #include "glm/gtc/matrix_transform.hpp"
 #include "raycasting.hpp"
+#include "../numerical/samplers/halton_sampler2d.hpp"
 #include <vector>
 
 brdf_plot::brdf_plot():
@@ -162,14 +163,12 @@ float brdf_plot::estimate_maximum_value(int samples_sqrt)
 {
   float max_value = std::numeric_limits<float>::lowest();
 
+  halton_sampler2d sampler2d;
   for (int i = 0; i < samples_sqrt; ++i)
   {
     for (int j = 0; j < samples_sqrt; ++j)
     {
-      const glm::vec2 sample{
-        (i + 0.5f) / (float) samples_sqrt,
-        (j + 0.5f) / (float) samples_sqrt
-      };
+      const auto sample = sampler2d.getNextSample();
 
       float pdf;
       auto test_vector = _brdf->sample(_view_dir, sample);

@@ -40,6 +40,13 @@ add_executable(${PROJECT_NAME}
   src/numerical/penalty_error_estimator.hpp
   src/numerical/penalty_optimizer.cpp
   src/numerical/penalty_optimizer.hpp
+  src/numerical/samplers/halton_sampler2d.cpp
+  src/numerical/samplers/halton_sampler2d.hpp
+  src/numerical/samplers/sampler2d.hpp
+  src/numerical/samplers/uniform_sampler2d.cpp
+  src/numerical/samplers/uniform_sampler2d.hpp
+  src/numerical/samplers/van_der_corput.cpp
+  src/numerical/samplers/van_der_corput.hpp
   src/numerical/vector_utils.cpp
   src/numerical/vector_utils.hpp
   src/plotting/brdf_plot.cpp

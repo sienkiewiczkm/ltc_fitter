@@ -1,6 +1,7 @@
 #include "ltc_error_estimator.hpp"
 #include "ltc.hpp"
 #include "../utils/hacks.hpp"
+#include "../numerical/samplers/halton_sampler2d.hpp"
 
 ltc_error_estimator::ltc_error_estimator(
   const brdf &brdf
@@ -35,19 +36,19 @@ float ltc_error_estimator::estimate_error(glm::vec3 parameters) const
   ltc.set_base_frame(_base_frame);
   ltc.set_ltc_parameters(parameters);
 
+  halton_sampler2d sampler2d;
   for (auto i = 0; i < num_samples; ++i)
   {
     for (auto j = 0; j < num_samples; ++j)
     {
-      const float u = (i + 0.5f) / static_cast<float>(num_samples);
-      const float v = (j + 0.5f) / static_cast<float>(num_samples);
+      const auto random_sample = sampler2d.getNextSample();
 
-      total_error += estimate_partial_error(ltc, _brdf, {u, v});
-      total_error += estimate_partial_error(_brdf, ltc, {u, v});
+      total_error += estimate_partial_error(ltc, _brdf, random_sample);
+      total_error += estimate_partial_error(_brdf, ltc, random_sample);
     }
   }
 
-  float final_error = static_cast<float>(total_error) / static_cast<float>(num_samples * num_samples);
+  float final_error = static_cast<float>(total_error / static_cast<double>(num_samples * num_samples));
   return final_error;
 }
 

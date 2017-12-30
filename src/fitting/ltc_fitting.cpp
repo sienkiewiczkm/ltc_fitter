@@ -11,6 +11,7 @@
 #include "../utils/hacks.hpp"
 #include "../numerical/penalty_optimizer.hpp"
 #include "../numerical/logarithmic_penalty_error_estimator.hpp"
+#include "../numerical/samplers/halton_sampler2d.hpp"
 
 ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm::vec3 &first_guess)
 {
@@ -73,15 +74,14 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
 ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &view_dir, const int num_samples)
 {
   ltc_average_terms average_terms{};
+  halton_sampler2d sampler2d;
 
   for (auto i = 0; i < num_samples; ++i)
   {
     for (auto j = 0; j < num_samples; ++j)
     {
-      const float u = (i + 0.5f) / static_cast<float>(num_samples);
-      const float v = (j + 0.5f) / static_cast<float>(num_samples);
-
-      const glm::vec3 light_dir = brdf.sample(view_dir, {u, v});
+      const auto random_sample = sampler2d.getNextSample();
+      const glm::vec3 light_dir = brdf.sample(view_dir, random_sample);
 
       float probability_density_function;
 
