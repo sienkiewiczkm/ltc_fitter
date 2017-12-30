@@ -20,11 +20,11 @@ float ltc::evaluate(
   float &probability_density_function
 ) const
 {
-  // here 'original' means original clamped cosine distrubution 'space'
+  // here 'original' means original clamped cosine distribution 'space'
   glm::vec3 original_light_dir = glm::normalize(get_framed_ltc_matrix_inv() * light_dir);
   auto len = glm::length(get_framed_ltc_matrix() * original_light_dir);
 
-  const float MIN_TRANSFORMED_LENGTH = 0.0001f;
+  const float MIN_TRANSFORMED_LENGTH = 0.000001f;
   if (len < MIN_TRANSFORMED_LENGTH)
   {
     log_error() << "Transformed light direction to original space is degenerated (with length = 0)." << std::endl;

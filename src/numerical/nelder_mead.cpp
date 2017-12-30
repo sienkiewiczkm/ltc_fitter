@@ -45,7 +45,7 @@ std::vector<float> nelder_mead::optimize(std::vector<float> start_parameters, co
   _iteration_epsilon = 1e-5f;
 
   auto iteration = 0;
-  auto max_iterations = 300;
+  auto max_iterations = 100;
 
   for (iteration = 0; iteration < max_iterations; ++iteration)
   {
@@ -79,7 +79,7 @@ bool nelder_mead::run_iteration()
   {
     return false;
   }
- */
+  */
 
   // stop if difference between maximum and minimum value is very low
   // read the source: Numerical Recipes in C++ (3rd Ed.)
