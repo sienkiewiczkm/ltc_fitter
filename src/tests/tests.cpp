@@ -95,7 +95,8 @@ void test_simple_ggx_fit()
     log_info() << " average direction: " << glm::to_string(average_direction) << std::endl;
 
     glm::vec3 first_guess = glm::vec3{1.0f, 1.0f, 0.0f};
-    auto data = ltc_fit(ggx, view_dir, true, first_guess);
+    glm::vec3 next_guess;
+    auto data = ltc_fit(ggx, view_dir, true, first_guess, next_guess);
 
     log_info() << "Store data:" << std::endl;
     log_info() << " a=" << data.matrix_parameters[0] << std::endl;

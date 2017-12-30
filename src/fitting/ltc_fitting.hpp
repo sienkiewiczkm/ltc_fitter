@@ -30,5 +30,6 @@ struct ltc_average_terms
   glm::vec3 average_direction;
 };
 
-ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm::vec3 &first_guess);
+ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, const glm::vec3 &first_guess,
+  glm::vec3 &next_first_guess);
 ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &view_dir, const int num_samples = 32);

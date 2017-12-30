@@ -81,9 +81,14 @@ fitting_result build_lookup(const fitting_settings &settings)
       glm::vec3 first_guess = last_result;
       first_guess.z = 0.0f;
 
+      log_info() << "First guess: " << glm::to_string(first_guess) << std::endl;
+
       try
       {
-        data = ltc_fit(*brdf, view_dir, angle_frag == 0, first_guess);
+        glm::vec3 next_first_guess;
+        data = ltc_fit(*brdf, view_dir, angle_frag == 0, first_guess, next_first_guess);
+        last_result = next_first_guess;
+        log_info() << "Next guess: " << glm::to_string(next_first_guess) << std::endl;
       }
       catch (...)
       {

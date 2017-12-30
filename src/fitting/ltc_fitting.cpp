@@ -13,9 +13,10 @@
 #include "../numerical/logarithmic_penalty_error_estimator.hpp"
 #include "../numerical/samplers/halton_sampler2d.hpp"
 
-ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm::vec3 &first_guess)
+ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, const glm::vec3 &first_guess,
+  glm::vec3 &next_first_guess)
 {
-  const float SAFE_AMPLITUDE_THRESHOLD = 0.0001f;
+  const float SAFE_AMPLITUDE_THRESHOLD = 0.00001f;
 
   auto average_terms = calculate_average_terms(brdf, view_dir);
 
@@ -61,6 +62,8 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, glm
   }
 
   log_debug() << "Adjusted result: " << glm::to_string(result) << std::endl;
+
+  next_first_guess = result;
 
   ltc ltc;
   ltc.set_amplitude(average_terms.distribution_norm);
