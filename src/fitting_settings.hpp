@@ -5,6 +5,7 @@
 enum class run_mode {
   normal,
   test,
+  preview_input,
   exit
 };
 
@@ -23,6 +24,8 @@ struct fitting_settings
   int num_threads;
   std::string brdf_method;
   std::string output_file;
+
+  std::string input_file;
 };
 
 bool get_fitting_settings_from_command_line(

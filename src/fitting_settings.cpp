@@ -17,6 +17,11 @@ bool get_fitting_settings_from_command_line(
     ("help", "help message")
     ("test", "run test suite")
     (
+      "preview-target",
+      po::value<std::string>(&output.input_file),
+      "generates images for preview target"
+    )
+    (
       "resolution,r",
       po::value<int>(&output.resolution)->default_value(64),
       "resolution of output image"
@@ -75,6 +80,11 @@ bool get_fitting_settings_from_command_line(
   if (var_map.count("test"))
   {
     output.run_mode = run_mode::test;
+    return true;
+  }
+
+  if (var_map.count("preview-target")) {
+    output.run_mode = run_mode::preview_input;
     return true;
   }
 
