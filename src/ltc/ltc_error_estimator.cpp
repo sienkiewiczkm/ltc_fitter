@@ -1,6 +1,5 @@
 #include "ltc_error_estimator.hpp"
 #include "ltc.hpp"
-#include "../utils/hacks.hpp"
 #include "../numerical/samplers/halton_sampler2d.hpp"
 
 ltc_error_estimator::ltc_error_estimator(
@@ -26,8 +25,6 @@ float ltc_error_estimator::estimate_error(glm::vec3 parameters) const
     parameters.y = parameters.x;
     parameters.z = 0.0f;
   }
-
-  //parameters = hacks::fix_parameters_below_zero(parameters);
 
   double total_error = 0.0f;
 
@@ -58,6 +55,8 @@ double ltc_error_estimator::estimate_partial_error(
   const glm::vec2 &random_parameters
 ) const
 {
+  // Use Multiple Importance Sampling technique with balance heuristics used as weight function.
+
   const glm::vec3 light_dir = sample_source.sample(_view_dir, random_parameters);
 
   float source_pdf, other_pdf;
@@ -68,7 +67,6 @@ double ltc_error_estimator::estimate_partial_error(
   source_pdf = fabs(source_pdf);
   other_pdf = fabs(other_pdf);
 
-  // TODO: Figure out why do we sum both PDFs
   double error1 = std::fabs(source_value - other_value);
   auto error3 = error1 * error1 * error1;
   auto partial_error = error3 / (source_pdf + other_pdf);

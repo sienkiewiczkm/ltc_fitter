@@ -1,6 +1,6 @@
 #include "ltc_lookup_builder.hpp"
 #include "../brdf/brdf.hpp"
-#include "../brdf/ggx.hpp"
+#include "../brdf/ggx_classic.hpp"
 #include "../ltc/ltc.hpp"
 #include "ltc_fitting.hpp"
 #include "../utils/helpers.hpp"
@@ -15,7 +15,7 @@
 #define GLM_ENABLE_EXPERIMENTAL
 
 #include "glm/gtx/string_cast.hpp"
-#include "../brdf/ggx_slope.hpp"
+#include "../brdf/ggx.hpp"
 #include "fitting_result.hpp"
 
 fitting_result build_lookup(const fitting_settings &settings)
@@ -24,7 +24,7 @@ fitting_result build_lookup(const fitting_settings &settings)
 
   if (settings.brdf_method == "ggx")
   {
-    brdf = new ggx_slope;
+    brdf = new ggx;
   }
   else
   {
@@ -44,11 +44,13 @@ fitting_result build_lookup(const fitting_settings &settings)
     // TODO: Restore support for roughness boundaries
     const auto roughness = rough_perc;
 
-    const float MIN_ALPHA = 0.01f;
+    const float MIN_ALPHA = 0.0001f;
     auto alpha = std::max(roughness * roughness, MIN_ALPHA);
     brdf->set_alpha(alpha);
 
-    glm::vec3 last_result{1.0f, 1.0f, 0.0f};
+    // This formula was created by hand to approximate (very roughly) initial roughness to speed up the process a bit.
+    const float first_scale_guess = 0.01f + 0.45f * roughness + 0.8f * roughness * roughness;
+    glm::vec3 last_result{first_scale_guess, first_scale_guess, 0.0f};
 
     for (auto angle_frag = 0; angle_frag < settings.resolution; ++angle_frag)
     {

@@ -25,7 +25,9 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, con
     log_error() << "BRDF amplitude is too small. It will result in wrong outputs. Aborting." << std::endl;
     log_error() << "View dir" << glm::to_string(view_dir);
     log_error() << "Amplitude = " << average_terms.distribution_norm << std::endl;
-    throw std::logic_error("Amplitude is too small.");
+
+    log_error() << "Skipping exception throw" << std::endl;
+    //throw std::logic_error("Amplitude is too small.");
   }
 
   log_debug() << "View direction = " << glm::to_string(view_dir) << std::endl;
