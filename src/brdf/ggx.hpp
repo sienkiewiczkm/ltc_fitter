@@ -1,45 +1,29 @@
 #pragma once
 
-#include "glm/glm.hpp"
 #include "brdf.hpp"
 
-/*
- * Trowbridge-Reitz aka GGX
- */
 class ggx: public brdf
 {
 public:
-  ggx();
+  std::string get_name() const override;
 
-  virtual ~ggx()
-  {
-  }
+  float evaluate(
+    const glm::vec3 &light_dir,
+    const glm::vec3 &view_dir,
+    float &probability_density_function
+  ) const override;
 
-  virtual void set_alpha(float alpha)
+  glm::vec3 sample(const glm::vec3 &view_dir, const glm::vec2 &random_parameters) const override;
+
+  void set_alpha(float alpha) override
   {
     _alpha = alpha;
   }
 
-  virtual std::string get_name() const
-  {
-    return "ggx";
-  }
-
-  virtual float evaluate(
-    const glm::vec3 &light_dir,
-    const glm::vec3 &view_dir,
-    float &probability_density_function
-  ) const;
-
-  virtual glm::vec3 sample(const glm::vec3 &view_dir, const glm::vec2 &random_parameters) const;
-  float pdf(float theta, float phi) const;
-
-protected:
-  float normal_ggx(glm::vec3 normal, glm::vec3 half_vector, float a) const;
-  float geometry_schlick_ggx(float NdotV, float k) const;
-  float geometry_smith(glm::vec3 normal, glm::vec3 view, glm::vec3 light, float k) const;
-
 private:
+  float calculate_shadow_masking_term(const glm::vec3 &light_dir, const glm::vec3 &view_dir) const;
+  float lambda(const float cosTheta) const;
+
   float _alpha;
-  glm::vec3 _normal;
+  float calculateNDF(const glm::vec3 &h) const;
 };

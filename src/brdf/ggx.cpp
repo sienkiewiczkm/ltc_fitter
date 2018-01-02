@@ -1,136 +1,100 @@
-#include "ggx.hpp"
 #include <boost/math/constants/constants.hpp>
+#include "ggx.hpp"
+#include "glm/glm.hpp"
 
-ggx::ggx():
-  _alpha{0.2f},
-  _normal{0.0f, 0.0f, 1.0f}
+// Alternate forms were (to my knowledge) created by Eric Heitz. See his Linearly Transformed Cosines paper for more
+// details (and papers listed below in code).
+
+std::string ggx::get_name() const
 {
+  return "ggx";
 }
 
-float ggx::evaluate(const glm::vec3 &light_dir, const glm::vec3 &view_dir, float &probability_density_function) const
+float ggx::evaluate(
+  const glm::vec3 &light_dir,
+  const glm::vec3 &view_dir,
+  float &probability_density_function
+) const
 {
   if (view_dir.z <= 0)
   {
-    probability_density_function = 0.0f;
+    probability_density_function = 0;
+    return 0;
+  }
+
+  float G2 = calculate_shadow_masking_term(light_dir, view_dir);
+
+  const glm::vec3 h = glm::normalize(view_dir + light_dir);
+  float D = calculateNDF(h);
+
+  probability_density_function = fabsf(D * h.z / 4.0f / glm::dot(view_dir, h));
+  float res = D * G2 / 4.0f / view_dir.z;
+
+  return res;
+}
+
+float ggx::calculateNDF(const glm::vec3 &h) const
+{
+  // tan(theta) = sqrt(x^2 + y^2) / (z^2) = (x^2/z^2) + (y^2/z^2) = (x/z)^2 + (y/z)^2
+  const float slope_x = h.x/h.z;
+  const float slope_y = h.y/h.z;
+  const float tan_theta = (slope_x*slope_x + slope_y*slope_y);
+
+  // Alternate form is result of dividing by alpha^2 inside parentheses in denominator in the GGX classic form.
+  // This form is also equal to Disney form:
+  //   cos(theta)^4 (alpha^2 + tan(theta)^2) = (alpha^2 cos(theta)^2 + sin(theta)^2)^2 =
+  //     = (alpha^2 cos(theta)^2 + 1 - cos(theta)^2) = (cos(theta)^2 (alpha^2 - 1) + 1)^2
+
+  float ndf = 1.0f / (1.0f + tan_theta/_alpha/_alpha);
+  ndf = (ndf*ndf) / (3.14159f * _alpha * _alpha * h.z*h.z*h.z*h.z);
+
+  return ndf;
+}
+
+glm::vec3 ggx::sample(const glm::vec3 &view_dir, const glm::vec2 &random_parameters) const
+{
+  float u1 = random_parameters.x;
+  float u2 = random_parameters.y;
+
+  // This is classic GGX sampling, it is rewritten to solve for X-axis side of right triangle. For simplicity,
+  // we assume that other side is equal to 1. Hypotenuse is equal to sqrt(r^2+1). In that case:
+  //   cos(theta) = (1) / sqrt(r^2+1)
+  // Now we can transform standard GGX sampling method by comparing that cos(theta) and cos(theta) defined by
+  // sampling method. In the end we get:
+  //   r = alpha * sqrt(u/(1-u))
+
+  const auto pi = boost::math::constants::pi<float>();
+  const float phi = 2.0f * pi * u1;
+  const float r = _alpha * sqrtf(u2/(1.0f - u2));
+
+  const glm::vec3 h = glm::normalize(glm::vec3(r*cosf(phi), r*sinf(phi), 1.0f));
+  const glm::vec3 l = glm::reflect(-view_dir, h);
+
+  return l;
+}
+
+float ggx::calculate_shadow_masking_term(const glm::vec3 &light_dir, const glm::vec3 &view_dir) const
+{
+  // See for more details:
+  // - Understanding the Masking-Shadowing Function in Microfacet-Based BRDFs
+  // - Microfacet Models for Refraction through Rough Surfaces
+  // - PBR Diffuse Lighting for GGX+Smith Microsurfaces (Slides)
+
+  if (light_dir.z <= 0.0f)
+  {
     return 0.0f;
   }
 
-  glm::vec3 half_vector = glm::normalize(view_dir + light_dir);
+  const auto lambda_v = lambda(view_dir.z);
+  const auto lambda_l = lambda(light_dir.z);
 
-  float ndf = normal_ggx(_normal, half_vector, _alpha);
+  auto g2 = 1.0f / (1.0f + lambda_v + lambda_l);
 
-  float r = std::sqrtf(_alpha) + 1.0f;
-  float k = (r * r) / 8.0f;
-  float geometry = geometry_smith(_normal, view_dir, light_dir, k);
-
-  float fresnel = 1.0f;
-
-  float nominator = ndf * geometry * fresnel;
-
-  float n_dot_l = std::max(glm::dot(_normal, light_dir), 0.0f);
-  float n_dot_v = std::max(glm::dot(_normal, view_dir), 0.0f);
-  float denominator = 4.0f * n_dot_l * n_dot_v + 0.001f;
-
-  //float n_dot_h = std::max(glm::dot(_normal, half_vector), 0.0f);
-  //float v_dot_h = std::max(glm::dot(view_dir, half_vector), 0.0f);
-  //probability_density_function = (ndf * n_dot_h) / (4.0f * v_dot_h);
-
-  // TODO: Probably wrong, just uniform, see LTC sampling for details, it should be uniform
-  const auto pi = boost::math::constants::pi<float>();
-  probability_density_function = 1.0f / 2.0f / pi;
-
-  return nominator / denominator;
+  return g2;
 }
 
-glm::vec3 ggx::sample(
-  const glm::vec3 &view_dir,
-  const glm::vec2 &random_parameters
-) const
+float ggx::lambda(const float cosTheta) const
 {
-  // based on publications:
-  //
-  // - Real Shading in Unreal Engine 4
-  //    by Brian Karis, Epic Games
-  //   from Siggraph 2013
-  //   url: https://goo.gl/x8DytH
-  //     especially: page 4
-  //
-  // - Notes on Importance Sampling
-  //    by Tobias Alexander Franke
-  //   url: https://goo.gl/otR4x1
-  //
-
-  const auto pi = boost::math::constants::pi<float>();
-
-  /*
-  float phi = 2.0f * pi * random_parameters.x;
-
-  auto cos_theta = std::sqrtf((1 - random_parameters.y) / (1 + (_alpha * _alpha - 1) * random_parameters.y));
-
-  auto sin_theta = std::sqrtf(1 - cos_theta * cos_theta);
-
-  glm::vec3 h = {
-    sin_theta * std::cos(phi),
-    sin_theta * std::sin(phi),
-    cos_theta
-  };
-
-  auto up_vector = std::fabs(_normal.z) < 0.999f
-    ? glm::vec3{0.0f, 0.0f, 1.0f}
-    : glm::vec3{1.0f, 0.0f, 0.0f};
-
-  auto tangent_x = glm::normalize(glm::cross(up_vector, _normal));
-  auto tangent_y = glm::cross(_normal, tangent_x);
-
-  return tangent_x * h.x + tangent_y * h.y + _normal * h.z;
-  */
-
-  // Uniform Sampling on sphere
-  // https://math.stackexchange.com/a/626563
-  return {
-    2.0f * std::sqrtf(random_parameters.x * (1 - random_parameters.x))
-      * std::cosf(2 * pi * random_parameters.y),
-    2.0f * std::sqrtf(random_parameters.x * (1 - random_parameters.x))
-      * std::sinf(2 * pi * random_parameters.y),
-    1.0f - 2.0f * random_parameters.x
-  };
-}
-
-float ggx::pdf(float theta, float phi) const
-{
-  // TODO: probably plain wrong
-  const auto pi = boost::math::constants::pi<float>();
-  auto probability_density_function = 1.0f / 2.0f / pi;
-  return probability_density_function;
-}
-
-float ggx::normal_ggx(glm::vec3 normal, glm::vec3 half_vector, float a) const
-{
-  float a2 = a * a;
-  float n_dot_h = std::max(glm::dot(normal, half_vector), 0.0f);
-  float n_dot_h_2 = n_dot_h * n_dot_h;
-
-  const auto pi = boost::math::constants::pi<float>();
-
-  float nominator = a2;
-  float denominator = (n_dot_h_2 * (a2 - 1.0f) + 1.0f);
-  denominator = pi * denominator * denominator;
-
-  return nominator / denominator;
-}
-
-float ggx::geometry_schlick_ggx(float n_dot_v, float k) const
-{
-  float nominator = n_dot_v;
-  float denominator = n_dot_v * (1.0f - k) + k;
-  return nominator / denominator;
-}
-
-float ggx::geometry_smith(glm::vec3 normal, glm::vec3 view, glm::vec3 light, float k) const
-{
-  float n_dot_v = std::max(glm::dot(normal, view), 0.0f);
-  float n_dot_l = std::max(glm::dot(normal, light), 0.0f);
-  float ggx1 = geometry_schlick_ggx(n_dot_l, k);
-  float ggx2 = geometry_schlick_ggx(n_dot_v, k);
-  return ggx1 * ggx2;
+  const float a = 1.0f / _alpha / tanf(acosf(cosTheta));
+  return (cosTheta < 1.0f) ? 0.5f * (-1.0f + sqrtf(1.0f + 1.0f/a/a)) : 0.0f;
 }
