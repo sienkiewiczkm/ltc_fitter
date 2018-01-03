@@ -1,6 +1,5 @@
 #include "ltc_lookup_builder.hpp"
 #include "../brdf/brdf.hpp"
-#include "../brdf/ggx_classic.hpp"
 #include "../ltc/ltc.hpp"
 #include "ltc_fitting.hpp"
 #include "../utils/helpers.hpp"

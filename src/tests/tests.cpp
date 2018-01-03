@@ -1,10 +1,10 @@
 #include "tests.hpp"
 #include <iostream>
-#include "../brdf/ggx_classic.hpp"
 #include "../plotting/brdf_plot.hpp"
 #include "../fitting/ltc_fitting.hpp"
 #include "../utils/log.hpp"
 #include "../ltc/ltc.hpp"
+#include "../brdf/ggx.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 #include "glm/gtx/string_cast.hpp"
@@ -30,7 +30,7 @@ void test_export_image()
 {
     log_info() << "VISUAL TEST: test_export_image started." << std::endl;
 
-    ggx_classic ggx;
+    ggx ggx;
     ggx.set_alpha(0.2f);
 
     auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});
@@ -71,7 +71,7 @@ void test_untransformed_ltc_amplitude()
 
 void test_ggx_amplitude()
 {
-    ggx_classic ggx;
+    ggx ggx;
     ggx.set_alpha(0.2f);
 
     glm::vec3 view_dir{0.0f, 0.0f, 1.0f};
@@ -86,7 +86,7 @@ void test_simple_ggx_fit()
 {
     log_info() << "VISUAL TEST: test_simple_ggx_fit started." << std::endl;
 
-    ggx_classic ggx;
+    ggx ggx;
     ggx.set_alpha(0.15f);
 
     auto view_dir = glm::normalize(glm::vec3{0.0f, 0.0f, 1.0f});

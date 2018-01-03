@@ -11,8 +11,6 @@ add_executable(${PROJECT_NAME}
   src/brdf/brdf.hpp
   src/brdf/ggx.cpp
   src/brdf/ggx.hpp
-  src/brdf/ggx_classic.cpp
-  src/brdf/ggx_classic.hpp
   src/exporters/alf_exporter.cpp src/exporters/alf_exporter.hpp
   src/files/arealights_ltc_file/arealights_ltc_file.cpp
   src/files/arealights_ltc_file/arealights_ltc_file.hpp

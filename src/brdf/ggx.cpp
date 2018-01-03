@@ -22,30 +22,36 @@ float ggx::evaluate(
     return 0;
   }
 
-  float G2 = calculate_shadow_masking_term(light_dir, view_dir);
+  float g2 = calculate_shadow_masking_term(light_dir, view_dir);
 
   const glm::vec3 h = glm::normalize(view_dir + light_dir);
-  float D = calculateNDF(h);
+  float ndf = calculateNDF(h);
 
-  probability_density_function = fabsf(D * h.z / 4.0f / glm::dot(view_dir, h));
-  float res = D * G2 / 4.0f / view_dir.z;
+  // Additional factor in the pdf (1/(4 dot(v,h))) is explained here:
+  // - Microfacet Models for Refraction through Rough Surfaces
+  // - Notes on the Ward BRDF, Bruce Walter
+  probability_density_function = fabsf(ndf * h.z / 4.0f / glm::dot(view_dir, h));
+
+  // We assume that Fresnel factor is equal to 1.
+  float res = ndf * g2 / 4.0f / view_dir.z;
 
   return res;
 }
 
 float ggx::calculateNDF(const glm::vec3 &h) const
 {
-  // tan(theta) = sqrt(x^2 + y^2) / (z^2) = (x^2/z^2) + (y^2/z^2) = (x/z)^2 + (y/z)^2
+  // tan(theta) = sqrt(x^2 + y^2) / z
+  // tan(theta)^2 = (x^2/z^2) + (y^2/z^2) = (x/z)^2 + (y/z)^2
   const float slope_x = h.x/h.z;
   const float slope_y = h.y/h.z;
-  const float tan_theta = (slope_x*slope_x + slope_y*slope_y);
+  const float tan_theta_sq = (slope_x*slope_x + slope_y*slope_y);
 
   // Alternate form is result of dividing by alpha^2 inside parentheses in denominator in the GGX classic form.
   // This form is also equal to Disney form:
   //   cos(theta)^4 (alpha^2 + tan(theta)^2) = (alpha^2 cos(theta)^2 + sin(theta)^2)^2 =
   //     = (alpha^2 cos(theta)^2 + 1 - cos(theta)^2) = (cos(theta)^2 (alpha^2 - 1) + 1)^2
 
-  float ndf = 1.0f / (1.0f + tan_theta/_alpha/_alpha);
+  float ndf = 1.0f / (1.0f + tan_theta_sq/_alpha/_alpha);
   ndf = (ndf*ndf) / (3.14159f * _alpha * _alpha * h.z*h.z*h.z*h.z);
 
   return ndf;
