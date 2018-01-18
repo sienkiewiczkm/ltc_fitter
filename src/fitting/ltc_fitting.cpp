@@ -3,7 +3,6 @@
 #include <exception>
 
 #include "ltc_fitting.hpp"
-#include "boost/math/constants/constants.hpp"
 #include "../ltc/ltc_error_estimator.hpp"
 #include "glm/gtx/string_cast.hpp"
 

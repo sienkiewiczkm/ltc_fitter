@@ -1,6 +1,6 @@
 #include "ltc.hpp"
 #include "../utils/log.hpp"
-#include "boost/math/constants/constants.hpp"
+#include "../utils/constants.hpp"
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -39,7 +39,6 @@ float ltc::evaluate(
     throw std::logic_error("Jacobian is NaN");
   }
 
-  const auto pi = boost::math::constants::pi<float>();
   float d = std::max(0.0f, original_light_dir.z) / pi / jacobian;
   float result = _amplitude * d;
 
@@ -50,14 +49,13 @@ float ltc::evaluate(
 
 glm::vec3 ltc::sample(const glm::vec3 &view_dir, const glm::vec2 &random_parameters) const
 {
-  const auto pi = boost::math::constants::pi<float>();
-  const float phi = std::acosf(std::sqrtf(random_parameters.x));
+  const float phi = std::acos(std::sqrt(random_parameters.x));
   const float theta = 2.0f * pi * random_parameters.y;
 
   const glm::vec3 original_sample{
-    std::sinf(phi) * std::cosf(theta),
-    std::sinf(phi) * std::sinf(theta),
-    std::cosf(phi)
+    std::sin(phi) * std::cos(theta),
+    std::sin(phi) * std::sin(theta),
+    std::cos(phi)
   };
 
   return glm::normalize(get_framed_ltc_matrix() * original_sample);

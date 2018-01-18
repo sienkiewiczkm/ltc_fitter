@@ -1,8 +1,7 @@
 #include <iostream>
-#include "boost/program_options.hpp"
 #include "fitting_settings.hpp"
 
-namespace po = boost::program_options;
+//namespace po = boost::program_options;
 
 bool get_fitting_settings_from_command_line(
   fitting_settings &output,
@@ -12,6 +11,14 @@ bool get_fitting_settings_from_command_line(
 {
   output = fitting_settings();
 
+  output.brdf_method = "ggx";
+  output.resolution = 4;
+  output.min_roughness = 0.0001f;
+  output.max_roughness = 1.0f;
+  output.num_error_estimate_samples = 32;
+  output.output_file = "output.ltc";
+
+  /*
   po::options_description description("Allowed options");
   description.add_options()
     ("help", "help message")
@@ -94,6 +101,7 @@ bool get_fitting_settings_from_command_line(
       << description << std::endl;
     return false;
   }
+  */
 
   return true;
 }

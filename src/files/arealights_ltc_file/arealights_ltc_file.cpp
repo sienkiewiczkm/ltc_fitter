@@ -1,4 +1,5 @@
 #include "arealights_ltc_file.hpp"
+#include <cstring>
 
 std::unique_ptr<alf::alf_file> alf::read_alf_file(const std::string &filename)
 {

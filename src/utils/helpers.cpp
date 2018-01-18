@@ -1,9 +1,15 @@
 #include "helpers.hpp"
 #include <string>
-#include "boost/date_time/posix_time/posix_time.hpp"
+#include <chrono>
+#include <iomanip>
 
 std::string get_time_str()
 {
-  auto now = boost::posix_time::second_clock::local_time();
-  return boost::posix_time::to_simple_string(now);
+  // Credit to: https://stackoverflow.com/a/17223443
+  auto current_time = std::chrono::system_clock::now();
+  std::time_t t = std::chrono::system_clock::to_time_t(current_time);
+
+  std::stringstream ss;
+  ss << std::put_time(std::localtime(&t), "%Y-%m-%d %X");
+  return ss.str();
 }

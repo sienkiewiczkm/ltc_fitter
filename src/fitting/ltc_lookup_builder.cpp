@@ -6,10 +6,10 @@
 #include "../utils/log.hpp"
 #include "../plotting/brdf_plot.hpp"
 #include "glm/glm.hpp"
-#include "boost/math/constants/constants.hpp"
 #include <iostream>
 #include <iomanip>
 #include <sstream>
+#include <cmath>
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -67,8 +67,8 @@ fitting_result build_lookup(const fitting_settings &settings)
       //
       const auto angle_perc = angle_frag / static_cast<float>(settings.resolution - 1);
       float cos_theta = 1.0f - angle_perc * angle_perc;
-      float theta = std::min(1.57f, std::acosf(cos_theta));
-      glm::vec3 view_dir{std::sinf(theta), 0.0f, std::cosf(theta)};
+      float theta = std::min(1.57f, std::acos(cos_theta));
+      glm::vec3 view_dir{std::sin(theta), 0.0f, std::cos(theta)};
 
       auto work_percent = (rough_frag * settings.resolution + angle_frag)
         / static_cast<float>(settings.resolution * settings.resolution);

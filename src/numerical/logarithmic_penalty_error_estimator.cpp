@@ -20,7 +20,7 @@ float logarithmic_penalty_error_estimator::calculate_penalty(std::vector<float> 
 
   for (auto i = 0; i < constraints_values.size(); ++i)
   {
-    auto single_penalty = std::logf(-constraints_values[i]);
+    auto single_penalty = std::log(-constraints_values[i]);
     accumulator += single_penalty;
   }
 

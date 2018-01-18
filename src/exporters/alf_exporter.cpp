@@ -1,4 +1,5 @@
 #include <memory>
+#include <cstring>
 #include "alf_exporter.hpp"
 
 std::unique_ptr<alf::alf_file> make_alf_file(const fitting_result &data)

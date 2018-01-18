@@ -1,6 +1,6 @@
-#include <boost/math/constants/constants.hpp>
 #include "ggx.hpp"
 #include "glm/glm.hpp"
+#include "../utils/constants.hpp"
 
 // Alternate forms were (to my knowledge) created by Eric Heitz. See his Linearly Transformed Cosines paper for more
 // details (and papers listed below in code).
@@ -69,7 +69,6 @@ glm::vec3 ggx::sample(const glm::vec3 &view_dir, const glm::vec2 &random_paramet
   // sampling method. In the end we get:
   //   r = alpha * sqrt(u/(1-u))
 
-  const auto pi = boost::math::constants::pi<float>();
   const float phi = 2.0f * pi * u1;
   const float r = _alpha * sqrtf(u2/(1.0f - u2));
 
