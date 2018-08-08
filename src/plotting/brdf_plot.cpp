@@ -4,6 +4,7 @@
 #include "raycasting.hpp"
 #include "../numerical/samplers/halton_sampler2d.hpp"
 #include <vector>
+#include <algorithm>
 
 brdf_plot::brdf_plot():
   _size{512},

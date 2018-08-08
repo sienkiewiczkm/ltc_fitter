@@ -49,8 +49,16 @@ ltc_store_data ltc_fit(brdf &brdf, glm::vec3 view_dir, bool force_isotropic, con
 
   penalty_optimizer optimizer;
   optimizer.set_penalty_estimator(penalty_estimator);
-  auto result_vector = optimizer.optimize({first_guess.x, first_guess.y, first_guess.z});
-  glm::vec3 result{result_vector[0], result_vector[1], result_vector[2]};
+  glm::vec3 result = {};
+  
+  try {
+	auto result_vector = optimizer.optimize({ first_guess.x, first_guess.y, first_guess.z });
+	result = { result_vector[0], result_vector[1], result_vector[2] };
+  } catch (...) {
+	log_error() << "Optimizer has failed. Result has not been found.";
+	throw;
+  }
+
 
   log_debug() << "Result: " << glm::to_string(result) << std::endl;
 
@@ -92,7 +100,7 @@ ltc_average_terms calculate_average_terms(const brdf &brdf, const glm::vec3 &vie
       float value = brdf.evaluate(light_dir, view_dir, probability_density_function);
       float weight = probability_density_function > 0.0f ? value / probability_density_function : 0.0f;
 
-      average_terms.distribution_norm += weight;
+      average_terms.distribution_norm += weight; // nD, co cosine here? is it already in?
 
       if (std::isnan(average_terms.distribution_norm))
       {

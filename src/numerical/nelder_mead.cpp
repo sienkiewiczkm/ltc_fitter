@@ -2,6 +2,7 @@
 #include "../utils/log.hpp"
 #include "vector_utils.hpp"
 #include <iostream>
+#include <algorithm>
 
 const float nelder_mead::_reflection_coeff = 1.0f;
 const float nelder_mead::_expansion_coeff = 2.0f;

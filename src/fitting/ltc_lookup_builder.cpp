@@ -10,6 +10,7 @@
 #include <iomanip>
 #include <sstream>
 #include <cmath>
+#include <algorithm>
 
 #define GLM_ENABLE_EXPERIMENTAL
 
@@ -36,7 +37,11 @@ fitting_result build_lookup(const fitting_settings &settings)
   fitting_result result;
   result.resize(settings.resolution, settings.resolution);
 
-  for (auto rough_frag = 0; rough_frag < settings.resolution; ++rough_frag)
+  glm::vec3 next_initial_parameters{1.0f, 1.0f, 0.0f};
+
+  int numFitted = 0;
+
+  for (auto rough_frag = settings.resolution - 1; rough_frag >= 0; --rough_frag)
   {
     const auto rough_perc = rough_frag / static_cast<float>(settings.resolution - 1);
 
@@ -48,8 +53,10 @@ fitting_result build_lookup(const fitting_settings &settings)
     brdf->set_alpha(alpha);
 
     // This formula was created by hand to approximate (very roughly) initial roughness to speed up the process a bit.
-    const float first_scale_guess = 0.01f + 0.45f * roughness + 0.8f * roughness * roughness;
-    glm::vec3 last_result{first_scale_guess, first_scale_guess, 0.0f};
+    //const float first_scale_guess = 0.01f + 0.45f * roughness + 0.8f * roughness * roughness;
+    //glm::vec3 last_result{first_scale_guess, first_scale_guess, 0.0f};
+
+	glm::vec3 last_result = next_initial_parameters;
 
     for (auto angle_frag = 0; angle_frag < settings.resolution; ++angle_frag)
     {
@@ -70,8 +77,7 @@ fitting_result build_lookup(const fitting_settings &settings)
       float theta = std::min(1.57f, std::acos(cos_theta));
       glm::vec3 view_dir{std::sin(theta), 0.0f, std::cos(theta)};
 
-      auto work_percent = (rough_frag * settings.resolution + angle_frag)
-        / static_cast<float>(settings.resolution * settings.resolution);
+      auto work_percent = numFitted / static_cast<float>(settings.resolution * settings.resolution);
 
       log_info() << std::setw(3) << static_cast<int>(work_percent * 100) << " " << std::setprecision(3)
         << std::setw(5) << theta << " " << std::setw(9) << roughness << std::endl;
@@ -89,10 +95,14 @@ fitting_result build_lookup(const fitting_settings &settings)
         glm::vec3 next_first_guess;
         data = ltc_fit(*brdf, view_dir, angle_frag == 0, first_guess, next_first_guess);
         last_result = next_first_guess;
-        log_info() << "Next guess: " << glm::to_string(next_first_guess) << std::endl;
+		if (angle_frag == 0) {
+			next_initial_parameters = next_first_guess;
+		}
+        log_info() << "Result (next guess): " << glm::to_string(next_first_guess) << std::endl;
       }
       catch (...)
       {
+		log_info() << "Exception was thrown. Aborting fitting process for current configuration.";
       }
 
       // TODO: Add option for image previews generation on the way.
@@ -112,6 +122,7 @@ fitting_result build_lookup(const fitting_settings &settings)
       }
 
       result.setData(angle_frag, rough_frag, data);
+	  ++numFitted;
     }
   }
 

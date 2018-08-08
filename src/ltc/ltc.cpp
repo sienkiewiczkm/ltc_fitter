@@ -24,7 +24,7 @@ float ltc::evaluate(
   glm::vec3 original_light_dir = glm::normalize(get_framed_ltc_matrix_inv() * light_dir);
   auto len = glm::length(get_framed_ltc_matrix() * original_light_dir);
 
-  const float MIN_TRANSFORMED_LENGTH = 0.000001f;
+  const float MIN_TRANSFORMED_LENGTH = 0.00000001f;
   if (len < MIN_TRANSFORMED_LENGTH)
   {
     log_error() << "Transformed light direction to original space is degenerated (with length = 0)." << std::endl;
@@ -63,10 +63,15 @@ glm::vec3 ltc::sample(const glm::vec3 &view_dir, const glm::vec2 &random_paramet
 
 void ltc::set_ltc_parameters(const glm::vec3 &parameters)
 {
+  // Safeguard against really low parameters which will result in irreversible ltc matrix.
+  float a = std::max(1e-7f, parameters.x);
+  float b = std::max(1e-7f, parameters.y);
+  float c = parameters.z;
+
   set_ltc_matrix({
-    {parameters.x, 0.0f,         0.0f},
-    {0.0f,         parameters.y, 0.0f},
-    {parameters.z, 0.0f,         1.0f}
+    {a,    0.0f, 0.0f},
+    {0.0f, b,    0.0f},
+    {c,    0.0f, 1.0f}
   });
 }
 
