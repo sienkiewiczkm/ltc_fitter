@@ -1,8 +1,8 @@
 #include <iostream>
 #include <sstream>
+#include <string>
 #include "fitting_settings.hpp"
 
-//namespace po = boost::program_options;
 
 bool get_fitting_settings_from_command_line(
   fitting_settings &output,
@@ -22,90 +22,35 @@ bool get_fitting_settings_from_command_line(
   ss << "result_" << output.resolution << "x" << output.resolution << ".ltc";
   output.output_file = ss.str();
 
-  /*
-  po::options_description description("Allowed options");
-  description.add_options()
-    ("help", "help message")
-    ("test", "run test suite")
-    (
-      "preview-target",
-      po::value<std::string>(&output.input_file),
-      "generates images for preview target"
-    )
-    (
-      "resolution,r",
-      po::value<int>(&output.resolution)->default_value(64),
-      "resolution of output image"
-    )
-    (
-      "minroughness,m",
-      po::value<float>(&output.min_roughness)->default_value(0.0001f),
-      "minimal roughness, should be greater than 0"
-    )
-    (
-      "maxroughness,M",
-      po::value<float>(&output.max_roughness)->default_value(1.0f),
-      "maximum roughness"
-    )
-    (
-      "errorsamples,E",
-      po::value<int>(
-        &output.num_error_estimate_samples
-      )->default_value(64),
-      "number of samples during error estimation"
-    )
-    (
-      "threads,j",
-      po::value<int>(
-        &output.num_threads
-      )->default_value(1),
-      "number of threads"
-    )
-    (
-      "brdf,b",
-      po::value<std::string>(&output.brdf_method)->default_value("ggx"),
-      "brdf method"
-    )
-    (
-      "output,o",
-      po::value<std::string>(&output.output_file),
-      "output file"
-    );
+  for (auto argId = 1; argId < argc; ++argId) {
+    std::string argument = argv[argId];
+    std::cout << "arg: " << argument << std::endl;
+    if (argument.substr(0, 2) != "--") {
+      std::cerr << "Unrecognized argument \"" << argument << "\". Aborting.";
+      throw std::logic_error("Unrecognized argument.");
+    }
 
-  po::variables_map var_map;
-  po::store(po::parse_command_line(argc, argv, description), var_map);
-  po::notify(var_map);
+    auto assignmentOperator = argument.find_first_of('=');
+    if (assignmentOperator == -1) {
+      throw std::logic_error("Argument assignment has assignment operator.");
+    }
 
-  if (var_map.count("help"))
-  {
-    std::cout << "LTC Fitter" << std::endl
-      << "Part of Master's thesis by Kamil Sienkiewicz" << std::endl
-      << "Based on work of Heitz et al: \"Linearly Transformed Cosines\""
-      << std::endl;
-    std::cout << description << std::endl;
+    auto key = argument.substr(2, assignmentOperator - 2);
+    auto value = argument.substr(assignmentOperator + 1, argument.length() - assignmentOperator - 1);
 
-    output.run_mode = run_mode::exit;
-    return true;
+    if (key == "brdf") {
+      output.brdf_method = value;
+    }
+    else if (key == "resolution") {
+      output.resolution = std::stoi(value);
+    }
+    else if (key == "min-roughness") {
+      output.min_roughness = std::stof(value);
+    }
+    else if (key == "output") {
+      output.output_file = value;
+    }
   }
-
-  if (var_map.count("test"))
-  {
-    output.run_mode = run_mode::test;
-    return true;
-  }
-
-  if (var_map.count("preview-target")) {
-    output.run_mode = run_mode::preview_input;
-    return true;
-  }
-
-  if (!var_map.count("output"))
-  {
-    std::cout << "Output file is not set." << std::endl
-      << description << std::endl;
-    return false;
-  }
-  */
 
   return true;
 }
